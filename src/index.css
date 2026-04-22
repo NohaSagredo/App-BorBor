@@ -1,0 +1,85 @@
+
+
+@keyframes ripple-effect {
+  0% { box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb, 244, 63, 94), 0.5); }
+  70% { box-shadow: 0 0 0 20px rgba(var(--color-primary-rgb, 244, 63, 94), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb, 244, 63, 94), 0); }
+}
+.btn-ripple {
+  animation: ripple-effect 2s infinite cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Base Utilidades Recuperadas */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.responsive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0 24px;
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05); /* Cristal Oscuro para temas deep */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  border-radius: 20px;
+}
+
+.responsive-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.hover-scale {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes appleGlowPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
+  70% { box-shadow: 0 0 0 18px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.animate-glow-pulse {
+  animation: appleGlowPulse 2s infinite ease-out;
+}
+
+.xp-bar-fill {
+  transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
