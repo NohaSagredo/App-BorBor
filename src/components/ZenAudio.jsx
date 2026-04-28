@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const SOUNDSCAPES = [
-  { id: 'rain', name: 'Lluvia Suave', icon: '🌧️', description: 'Gotas de lluvia relajantes' },
   { id: 'bowls', name: 'Cuencos Tibetanos', icon: '🔔', description: 'Tonos armónicos profundos' },
+  { id: 'rain', name: 'Lluvia Suave', icon: '🌧️', description: 'Gotas de lluvia relajantes' },
   { id: 'ocean', name: 'Olas de Mar', icon: '🌊', description: 'Oleaje rítmico y sereno' },
   { id: 'forest', name: 'Bosque Nocturno', icon: '🌿', description: 'Sonidos suaves de naturaleza' }
 ];
 
-function createNoiseBuffer(audioCtx, duration = 2) {
+function createWhiteNoiseBuffer(audioCtx, duration = 2) {
   const sampleRate = audioCtx.sampleRate;
   const length = sampleRate * duration;
   const buffer = audioCtx.createBuffer(1, length, sampleRate);
@@ -18,42 +18,63 @@ function createNoiseBuffer(audioCtx, duration = 2) {
   return buffer;
 }
 
+function createBrownianNoiseBuffer(audioCtx, duration = 4) {
+  const sampleRate = audioCtx.sampleRate;
+  const length = sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, length, sampleRate);
+  const data = buffer.getChannelData(0);
+  let lastOut = 0.0;
+  for (let i = 0; i < length; i++) {
+    const white = Math.random() * 2 - 1;
+    lastOut = (lastOut + (0.025 * white)) / 1.025;
+    data[i] = lastOut * 3.5; // Amplify for use
+  }
+  return buffer;
+}
+
 function startRain(audioCtx, gainNode) {
-  const noiseBuffer = createNoiseBuffer(audioCtx, 4);
-  
-  const noiseSource = audioCtx.createBufferSource();
-  noiseSource.buffer = noiseBuffer;
-  noiseSource.loop = true;
+  const rainBuffer = createBrownianNoiseBuffer(audioCtx, 4);
+  const source = audioCtx.createBufferSource();
+  source.buffer = rainBuffer;
+  source.loop = true;
 
-  // Bandpass filter for rain-like pink noise
+  // Primary filter: Lowpass for the "heavy" part of rain
   const filter = audioCtx.createBiquadFilter();
-  filter.type = 'bandpass';
-  filter.frequency.value = 800;
-  filter.Q.value = 0.5;
+  filter.type = 'lowpass';
+  filter.frequency.value = 1200;
+  filter.Q.value = 0.7;
 
-  // Second highpass for crispness
-  const highpass = audioCtx.createBiquadFilter();
-  highpass.type = 'highpass';
-  highpass.frequency.value = 400;
+  // Secondary filter: Highpass for the "splash" detail
+  const detailFilter = audioCtx.createBiquadFilter();
+  detailFilter.type = 'highpass';
+  detailFilter.frequency.value = 2500;
+  
+  const detailGain = audioCtx.createGain();
+  detailGain.gain.value = 0.4;
 
-  // Subtle LFO modulation on filter for organic feel
+  // LFO for volume "gusts"
   const lfo = audioCtx.createOscillator();
   lfo.type = 'sine';
-  lfo.frequency.value = 0.15;
+  lfo.frequency.value = 0.12; 
   const lfoGain = audioCtx.createGain();
-  lfoGain.gain.value = 200;
+  lfoGain.gain.value = 0.15;
   lfo.connect(lfoGain);
-  lfoGain.connect(filter.frequency);
+  lfoGain.connect(gainNode.gain);
   lfo.start();
 
-  noiseSource.connect(filter);
-  filter.connect(highpass);
-  highpass.connect(gainNode);
-  noiseSource.start();
+  // Connect paths
+  source.connect(filter);
+  filter.connect(gainNode);
+
+  source.connect(detailFilter);
+  detailFilter.connect(detailGain);
+  detailGain.connect(gainNode);
+
+  source.start();
 
   return () => {
     try {
-      noiseSource.stop();
+      source.stop();
       lfo.stop();
     } catch(e) {}
   };
@@ -119,7 +140,7 @@ function startBowls(audioCtx, gainNode) {
 }
 
 function startOcean(audioCtx, gainNode) {
-  const noiseBuffer = createNoiseBuffer(audioCtx, 4);
+  const noiseBuffer = createWhiteNoiseBuffer(audioCtx, 4);
   
   const noiseSource = audioCtx.createBufferSource();
   noiseSource.buffer = noiseBuffer;
@@ -171,7 +192,7 @@ function startOcean(audioCtx, gainNode) {
 
 function startForest(audioCtx, gainNode) {
   // Base: very quiet pink noise (wind through leaves)
-  const noiseBuffer = createNoiseBuffer(audioCtx, 4);
+  const noiseBuffer = createWhiteNoiseBuffer(audioCtx, 4);
   const noiseSource = audioCtx.createBufferSource();
   noiseSource.buffer = noiseBuffer;
   noiseSource.loop = true;
@@ -241,7 +262,7 @@ const SOUND_STARTERS = {
 
 export default function ZenAudio({ isPlaying, onTogglePlay }) {
   const [selectedSound, setSelectedSound] = useState(() => {
-    return localStorage.getItem('borbor-zen-sound') || 'rain';
+    return localStorage.getItem('borbor-zen-sound') || 'bowls';
   });
   const [volume, setVolume] = useState(() => {
     return parseFloat(localStorage.getItem('borbor-zen-volume') || '0.5');

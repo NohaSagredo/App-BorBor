@@ -69,7 +69,7 @@ export default function DailyCheckInModal({ onComplete, onClose }) {
   return createPortal(
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(255, 255, 255, 0.85)',
+      background: 'rgba(0, 0, 0, 0.4)',
       backdropFilter: 'blur(15px)',
       WebkitBackdropFilter: 'blur(15px)',
       zIndex: 999999,
@@ -100,9 +100,9 @@ export default function DailyCheckInModal({ onComplete, onClose }) {
                         onClick={() => handleSelect(opt.value)}
                         className="hover-scale"
                         style={{
-                            background: answers[stepData.id] === opt.value ? 'var(--color-primary)' : 'white',
-                            color: answers[stepData.id] === opt.value ? 'white' : 'var(--color-text-main)',
-                            border: answers[stepData.id] === opt.value ? 'none' : '1px solid rgba(0,0,0,0.08)',
+                            background: answers[stepData.id] === opt.value ? 'var(--color-primary)' : 'var(--glass-bg)',
+                            color: answers[stepData.id] === opt.value ? 'var(--btn-text-color)' : 'var(--color-text-main)',
+                            border: answers[stepData.id] === opt.value ? 'none' : '1px solid var(--glass-border)',
                             padding: '1.5rem',
                             borderRadius: '20px',
                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',

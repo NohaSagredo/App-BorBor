@@ -146,9 +146,9 @@ const Particles = ({ phase, time, color }) => {
           p.vx *= 0.98;
           p.vy *= 0.98;
         } else {
-          // IDLE: Flotar vagamente The floating firefly
-          p.vx += (Math.random() - 0.5) * 0.02;
-          p.vy += (Math.random() - 0.5) * 0.02;
+          // IDLE: Flotar vagamente como luciérnagas
+          p.vx += (Math.random() - 0.5) * 0.015 + Math.sin(p.blinkOffset) * 0.005;
+          p.vy += (Math.random() - 0.5) * 0.015 + Math.cos(p.blinkOffset) * 0.005;
           p.vx *= 0.99;
           p.vy *= 0.99;
         }
@@ -171,18 +171,25 @@ const Particles = ({ phase, time, color }) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size * (phase === 'CONTRACT' ? 1.5 : 1), 0, Math.PI * 2);
         
+        // Efecto premium de resplandor (Glow)
+        ctx.shadowBlur = p.size * 6;
+        ctx.shadowColor = color;
+
         ctx.fillStyle = color;
         // opacidad pulsante
         const pulse = phase === 'CONTRACT' ? 1 : currentOp;
         ctx.globalAlpha = pulse;
         ctx.fill();
         
-        // Glow effect for some particles
-        if (p.size > 2) {
+        // Reset shadow for next particle to avoid compounding performance hit
+        ctx.shadowBlur = 0;
+        
+        // Glow effect for larger particles (Orbes)
+        if (p.size > 2.5) {
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 3.5, 0, Math.PI * 2);
           ctx.fillStyle = color;
-          ctx.globalAlpha = pulse * 0.3;
+          ctx.globalAlpha = pulse * 0.25;
           ctx.fill();
         }
       });

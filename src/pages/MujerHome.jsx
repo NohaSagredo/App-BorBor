@@ -254,6 +254,12 @@ export default function MujerHome() {
         if (userSnap.exists()) {
           const data = userSnap.data();
           setUserData(data);
+          
+          // Guardar rol y validar acceso (Bug Fix #4)
+          if (data.role === 'hombre') {
+            navigate('/hombre');
+            return;
+          }
 
           // Configurar datos de ciclo
           if (data.lastPeriodStart) {

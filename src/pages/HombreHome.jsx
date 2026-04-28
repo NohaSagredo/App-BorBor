@@ -249,6 +249,12 @@ export default function HombreHome() {
           const data = userSnap.data();
           setUserData(data);
 
+          // Guardar rol y validar acceso (Bug Fix #4)
+          if (data.role === 'mujer') {
+            navigate('/mujer');
+            return;
+          }
+
           let partnersArray = data.linkedPartners || [];
           // Backward compatibility 
           if (partnersArray.length === 0 && data.linkedPartnerId) {

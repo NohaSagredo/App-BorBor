@@ -323,7 +323,14 @@ export default function AcademyModule() {
   }
 
   return (
-    <div className="animate-fade-in popup-root" style={{ padding: '2rem', minHeight: '100vh', maxWidth: '400px', margin: '0 auto', paddingBottom: '80px' }}>
+    <div className="animate-fade-in academy-root" style={{ 
+      padding: '1.5rem', 
+      minHeight: '100vh', 
+      maxWidth: '1200px', 
+      margin: '0 auto', 
+      paddingBottom: '100px',
+      boxSizing: 'border-box'
+    }}>
 
       {/* Animación de monedas */}
       {coinAnimation && (
@@ -377,6 +384,27 @@ export default function AcademyModule() {
           transform: translateY(-2px);
           background: rgba(255,255,255,0.2);
         }
+        .academy-lessons-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+        @media (min-width: 768px) {
+          .academy-lessons-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px !important;
+          }
+          .academy-hero-content {
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            text-align: left !important;
+          }
+          .academy-hero-stats {
+            max-width: 600px !important;
+          }
+        }
       `}</style>
 
       {/* Botón Volver */}
@@ -412,46 +440,64 @@ export default function AcademyModule() {
         <div className="academy-hero-particle" style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.15)', bottom: 20, right: 40, animation: 'academyFloat1 7s ease-in-out infinite 2s' }} />
 
         {/* Fila principal: Texto + Anillo de Progreso */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', position: 'relative', zIndex: 2 }}>
+        <div className="academy-hero-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
 
           {/* Columna Izquierda: Título */}
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '0.8rem' }}>
               <div style={{
-                width: '42px', height: '42px', borderRadius: '14px',
+                width: '56px', height: '56px', borderRadius: '18px',
                 background: 'rgba(255,255,255,0.2)',
-                backdropFilter: 'blur(6px)',
+                backdropFilter: 'blur(10px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '1px solid rgba(255,255,255,0.25)'
+                border: '1px solid rgba(255,255,255,0.3)',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
               }}>
-                <BookOpen size={22} color="#fff" />
+                <BookOpen size={28} color="#fff" />
               </div>
-              <h1 style={{ color: '#fff', fontSize: '1.8rem', margin: 0, fontWeight: 800, letterSpacing: '-0.5px', textShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-                Academia
-              </h1>
+              <div>
+                <h1 style={{ color: '#fff', fontSize: '2.2rem', margin: 0, fontWeight: 900, letterSpacing: '-0.8px', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
+                  Academia
+                </h1>
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.2)', 
+                  padding: '2px 10px', 
+                  borderRadius: '20px', 
+                  fontSize: '0.7rem', 
+                  color: '#fff', 
+                  fontWeight: 700,
+                  display: 'inline-block',
+                  marginTop: '4px',
+                  textTransform: 'uppercase'
+                }}>
+                  Biblioteca de Salud ({role})
+                </div>
+              </div>
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.82rem', margin: '0.3rem 0 0 0', lineHeight: 1.4, maxWidth: '220px' }}>
-              Conocimiento clínico y control anatómico para tu bienestar íntimo.
+            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.95rem', margin: '0.5rem 0 0 0', lineHeight: 1.5, maxWidth: '450px' }}>
+              Explora lecciones diseñadas por expertos para el control anatómico y bienestar pélvico. Todo lo que necesitas saber en un solo lugar.
             </p>
           </div>
 
           {/* Columna Derecha: Anillo SVG de progreso general */}
-          <div style={{ position: 'relative', width: '90px', height: '90px', flexShrink: 0 }}>
-            <svg width="90" height="90" viewBox="0 0 90 90" style={{ transform: 'rotate(-90deg)', animation: 'academyPulseRing 3s ease-in-out infinite' }}>
-              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="6" />
-              <circle cx="45" cy="45" r="38" fill="none" stroke="#fff" strokeWidth="6"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 38}`}
-                strokeDashoffset={`${2 * Math.PI * 38 * (1 - progressRatio / 100)}`}
-                style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}
-              />
-            </svg>
-            <div style={{
-              position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <span style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>{progressRatio}%</span>
-              <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.6rem', fontWeight: 600, marginTop: '2px' }}>LEÍDO</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ position: 'relative', width: '110px', height: '110px', flexShrink: 0 }}>
+              <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)', animation: 'academyPulseRing 3.5s ease-in-out infinite' }}>
+                <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
+                <circle cx="55" cy="55" r="48" fill="none" stroke="#fff" strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 48}`}
+                  strokeDashoffset={`${2 * Math.PI * 48 * (1 - progressRatio / 100)}`}
+                  style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                />
+              </svg>
+              <div style={{
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <span style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 900, lineHeight: 1 }}>{progressRatio}%</span>
+                <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '1px' }}>LEÍDO</span>
+              </div>
             </div>
           </div>
         </div>
@@ -466,7 +512,7 @@ export default function AcademyModule() {
         }} />
 
         {/* Fila de Stats */}
-        <div style={{ display: 'flex', gap: '8px', position: 'relative', zIndex: 2 }}>
+        <div className="academy-hero-stats" style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
           {/* Stat: Lecciones */}
           <div className="academy-stat-chip">
             <span style={{ fontSize: '1.2rem' }}>📖</span>
@@ -522,7 +568,7 @@ export default function AcademyModule() {
       </div>
 
       {/* Lista de Lecciones Expandibles */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <div className="academy-lessons-grid">
         {contentList.map((lesson) => {
           const isExpanded = expandedId === lesson.id;
           const isRead = readLessons.includes(lesson.id);

@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebase';
-import { collection, getDocs, doc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, updateDoc, query, orderBy, limit } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { ArrowLeft, Save, User, Activity, Settings, Calendar as CalendarIcon, PieChart } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
 import GlobalLoader from '../components/GlobalLoader';
-
-const ADMIN_UID = 'O4uALBlfRGZgqmxxGoEOKicgd0F2';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -32,11 +30,18 @@ export default function AdminDashboard() {
   
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user || user.uid !== ADMIN_UID) {
-        navigate('/'); // expulsar si no es admin
+      if (!user) {
+        navigate('/');
         return;
       }
+
       try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+          navigate('/'); // expulsar si no es admin en DB
+          return;
+        }
+
         const usersSnap = await getDocs(collection(db, 'users'));
         const uList = [];
         usersSnap.forEach(snap => {

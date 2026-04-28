@@ -6,7 +6,8 @@
 * Desarrollar una plataforma integral de bienestar sexual y fortalecimiento del piso pélvico orientada a la mujer, con diseño premium, gamificación (Reto de 30 Días), feedback visual motivador y currícula educativa.
 
 ## 📌 Foco de la Sesión Actual
-* **Finalizado:** Rediseño visual "Premium" completo de la aplicación (`HombreHome`, `MujerHome`, `AdminDashboard`, `KegelsModule`, `Welcome`). Estandarización de estética glassmorphic, gradientes y animaciones.
+* **Finalizado:** Migración completa de marca (Holistica -> BorBor) y separación de infraestructura (Backend propio en Chile/Brasil).
+* **Finalizado:** Seguridad Nivel 2: Implementación de Control de Acceso Basado en Roles (RBAC) en Firestore y validaciones de ruta.
 
 ## 🗺️ Arquitectura y Decisiones Clave
 * **Stack Tecnológico:** React 19, Vite, Firebase (Auth + Firestore).
@@ -23,18 +24,25 @@
 * Rediseño visual total de `HombreHome.jsx` y `MujerHome.jsx` con headers dinámicos y XP tracking.
 * Embellecimiento de `KegelsModule.jsx` y `Welcome.jsx` (página de inicio).
 * Transformación premium del `AdminDashboard.jsx` con paneles de insights mejorados y CRUD estilizado.
-* Limpieza de código duplicado en módulos críticos para asegurar un build estable.
+* Migración de marca a BorBor y conexión a nuevo proyecto de Firebase.
+* Implementación de Seguridad Nivel 2 (Roles en DB) para el Dashboard administrativo.
+* Refinamiento de micro-animaciones (CSS y transiciones fluidas).
+* Mejora drástica de la estética del fondo animado (Glow y orbes fluidos en Canvas).
 
 ## 📋 Tareas Pendientes (To-Do)
 1. [ ] **[Alta Prioridad]:** Optimización de Rendimiento (Performance). Reducir el tamaño de los bundles y optimizar renders innecesarios en dashboards pesados.
-2. [ ] **[Baja Prioridad]:** Refinar micro-animaciones (CSS y Canvas).
+2. [x] **[Finalizado]:** Refinar micro-animaciones (CSS y Canvas).
 3. [ ] **[Media Prioridad]:** Crear un sistema de notificaciones para recordar al usuario que debe realizar sus ejercicios.
-4. [ ] **[Media Prioridad]:** Aumentar el ancho de visualizacion de la sección de academia. Con un diseño flexible inteligente adaptable a diferentes tamaños de pantalla.
-5. [ ] **[Evaluación]:** Incorporar música Zen o ambientación de fondo al iniciar reproducciones de Kegels.
+4. [x] **[Finalizado]:** Aumentar el ancho de visualizacion de la sección de academia. Con un diseño flexible inteligente adaptable a diferentes tamaños de pantalla.
+5. [/] **[En curso]:** Incorporar música Zen o ambientación de fondo (Implementado ZenAudio básico).
+6. [ ] **[Alta Prioridad]:** Agregar sonidos de recompensa (XP/Monedas).
+7. [ ] **[Media Prioridad]:** Sincronizar sonidos con los ritmos de las actividades Kegel.
+8. [x] **[Finalizado]:** Mejorar drásticamente la estética del fondo animado (orbes y luciérnagas).
 
 ## 🐞 Bugs Activos y Blockers
-* Al terminar una rutina de kegels, se vuelve al perfil de mujer aunque el usuario sea hombre.
-* El usuario puede acceder al perfil de mujer aunque sea hombre cambiando la url y viceversa.
+* **Resuelto:** Acceso administrativo mediante UID fijo (Migrado a Roles).
+* **Resuelto:** Redirección de género post-ejercicio (Bug #4).
+* **Resuelto:** Acceso cruzado a perfiles de género opuesto (Bug #4).
 
 ## 📂 Archivos Principales en Modificación
 * `AdminDashboard.jsx`, `HombreHome.jsx`, `MujerHome.jsx`, `KegelsModule.jsx`, `Welcome.jsx`.

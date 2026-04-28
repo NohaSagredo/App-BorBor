@@ -16,6 +16,7 @@ export default function KegelsModule() {
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
   const [userUid, setUserUid] = useState(null);
+  const [userRole, setUserRole] = useState('mujer'); // Default safety
 
   // States de entrenamiento
   const [isWorkingOut, setIsWorkingOut] = useState(false);
@@ -45,8 +46,9 @@ export default function KegelsModule() {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
+          setUserRole(data.role || 'mujer'); // Guardar rol
           setXp(data.xp || 0);
-          setCoins(data.coins || 0);
+          setCoins(data.kegelCoins || 0);
           
           let myLevel = LEVELS[0];
           for (let l of LEVELS) {
@@ -162,7 +164,7 @@ export default function KegelsModule() {
        const today = new Date().toLocaleDateString('en-CA');
        await updateDoc(doc(db, 'users', userUid), {
           xp: xp + currentLevel.reward,
-          coins: coins + currentLevel.reward,
+          kegelCoins: coins + currentLevel.reward,
           challengeLogs: arrayUnion(today)
        });
        setXp(p => p + currentLevel.reward);
@@ -490,7 +492,7 @@ export default function KegelsModule() {
           <h2 style={{ fontSize: '1.6rem', color: '#fff', marginBottom: '0.3rem', fontWeight: 800, position: 'relative', zIndex: 2 }}>Â¡Recompensas!</h2>
           <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.9)', fontWeight: 700, marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>+{currentLevel.reward} XP / +{currentLevel.reward} Monedas</p>
 
-          <button onClick={() => navigate('/mujer')} style={{
+          <button onClick={() => navigate(userRole?.toLowerCase()?.trim() === 'hombre' ? '/hombre' : '/mujer')} style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
             background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)',
             border: '1px solid rgba(255,255,255,0.25)',

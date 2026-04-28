@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { auth, db, storage } from '../firebase';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, arrayUnion } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -417,7 +417,7 @@ export default function Profile() {
       </div>
 
       {/* â•â•â• Admin Access â•â•â• */}
-      {(userData?.role === 'admin' || auth.currentUser?.uid === 'O4uALBlfRGZgqmxxGoEOKicgd0F2') && (
+      {(userData?.role === 'admin') && (
         <div className="prof-section-card" style={{
           border: '1.5px solid rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.04)',
           animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both'
