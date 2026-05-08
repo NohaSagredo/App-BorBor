@@ -4,6 +4,7 @@ import { auth, db } from '../firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
+  sendPasswordResetEmail,
   updateProfile 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -22,6 +23,33 @@ export default function Auth() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError('Ingresa tu correo electrónico primero.');
+      return;
+    }
+    setResetLoading(true);
+    setError('');
+    setResetSent(false);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetSent(true);
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'auth/user-not-found') {
+        setError('No existe una cuenta con ese correo.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('El correo ingresado no es válido.');
+      } else {
+        setError('Error al enviar el correo. Inténtalo de nuevo.');
+      }
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -214,7 +242,30 @@ export default function Auth() {
                   className="w-full bg-white/5 border border-white/10 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-xl py-3 pl-11 pr-4 text-white text-sm outline-none transition-all"
                 />
               </div>
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="text-xs text-slate-400 hover:text-primary font-semibold transition-colors mt-1 self-end disabled:opacity-50"
+                >
+                  {resetLoading ? 'Enviando...' : '¿Olvidaste tu contraseña?'}
+                </button>
+              )}
             </div>
+
+            <AnimatePresence>
+              {resetSent && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl text-xs font-semibold text-center backdrop-blur-sm overflow-hidden"
+                >
+                  ✅ Se envió un enlace de recuperación a <strong>{email}</strong>. Revisa tu bandeja de entrada.
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <button 
               type="submit" 

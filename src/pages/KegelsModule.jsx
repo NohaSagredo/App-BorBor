@@ -99,7 +99,7 @@ export default function KegelsModule() {
   };
 
   const quitWorkout = () => {
-    if(!window.confirm("Â¿Seguro que deseas abortar tu sesiÃ³n?")) return;
+    if(!window.confirm("¿Seguro que deseas abortar tu sesión?")) return;
     setIsWorkingOut(false);
     setIsPaused(false);
     setPhase('IDLE');
@@ -183,10 +183,10 @@ export default function KegelsModule() {
   let instruction = 'Listo para empezar';
 
   if (phase === 'PREPARE') {
-    instruction = 'PrepÃ¡rate...';
+    instruction = 'Prepárate...';
     circleColor = 'var(--color-text-muted)'; 
   } else if (phase === 'CONTRACT') {
-    instruction = 'Â¡CONTRAE!';
+    instruction = '¡CONTRAE!';
     circleScale = 0.6; 
   } else if (phase === 'RELAX') {
     instruction = 'RELAJA';
@@ -250,7 +250,7 @@ export default function KegelsModule() {
         onTogglePlay={(playRequest) => setIsMusicManuallyPaused(!playRequest)}
       />
 
-      {/* â•â•â• HERO HEADER â•â•â• */}
+      {/* ═══ HERO HEADER ═══ */}
       <div style={{
         borderRadius: '24px', padding: '1.5rem',
         marginBottom: '1.5rem',
@@ -303,7 +303,7 @@ export default function KegelsModule() {
             <span style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.6rem', fontWeight:600 }}>XP</span>
           </div>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
-            <span style={{ fontSize:'0.9rem' }}>ðŸ’°</span>
+            <span style={{ fontSize:'0.9rem' }}>💰</span>
             <span style={{ color:'#fff', fontSize:'1rem', fontWeight:800 }}>{coins}</span>
             <span style={{ color:'rgba(255,255,255,0.6)', fontSize:'0.6rem', fontWeight:600 }}>Monedas</span>
           </div>
@@ -359,7 +359,7 @@ export default function KegelsModule() {
               </div>
 
               <h1 style={{ color: 'var(--color-text-main)', fontSize: '1.5rem', marginBottom: '0.3rem', fontWeight: 800 }}>{currentLevel.name}</h1>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>Fortalece tu centro de vitalidad pÃ©lvica.</p>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.88rem', marginBottom: '1.5rem' }}>Fortalece tu centro de vitalidad pélvica.</p>
 
               <div style={{
                 display: 'flex', justifyContent: 'space-around', padding: '1rem',
@@ -381,7 +381,7 @@ export default function KegelsModule() {
                 </div>
               </div>
 
-              {!nextLevel && <p style={{ color: '#10b981', fontSize: '0.82rem', marginBottom: '1rem', fontWeight: 600 }}>ðŸ† Â¡Nivel mÃ¡ximo alcanzado!</p>}
+              {!nextLevel && <p style={{ color: '#10b981', fontSize: '0.82rem', marginBottom: '1rem', fontWeight: 600 }}>🏆 ¡Nivel máximo alcanzado!</p>}
 
               <button onClick={startWorkout} className="kgl-start-btn">
                 <Play size={18} /> Iniciar Entrenamiento
@@ -468,13 +468,13 @@ export default function KegelsModule() {
           }}>
             <CheckCircle size={28} color="#fff" />
           </div>
-          <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-highlight)', marginBottom: '0.5rem', fontWeight: 800 }}>Â¡Excelente Trabajo!</h2>
-          <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.88rem' }}>Â¿CÃ³mo sentiste la sesiÃ³n?</p>
+          <h2 style={{ fontSize: '1.5rem', color: 'var(--color-text-highlight)', marginBottom: '0.5rem', fontWeight: 800 }}>¡Excelente Trabajo!</h2>
+          <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem', fontSize: '0.88rem' }}>¿Cómo sentiste la sesión?</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <button onClick={() => submitFeedback('easy')} className="kgl-feedback-btn">ðŸŸ¢ Muy fÃ¡cil â€” Control total</button>
-            <button onClick={() => submitFeedback('medium')} className="kgl-feedback-btn">ðŸŸ¡ Moderado â€” Buen esfuerzo</button>
-            <button onClick={() => submitFeedback('hard')} className="kgl-feedback-btn">ðŸ”´ DifÃ­cil â€” CostÃ³ sostener</button>
+            <button onClick={() => submitFeedback('easy')} className="kgl-feedback-btn">🟢 Muy fácil — Control total</button>
+            <button onClick={() => submitFeedback('medium')} className="kgl-feedback-btn">🟡 Moderado — Buen esfuerzo</button>
+            <button onClick={() => submitFeedback('hard')} className="kgl-feedback-btn">🔴 Difícil — Costó sostener</button>
           </div>
         </div>
       )}
@@ -488,8 +488,8 @@ export default function KegelsModule() {
           animation: 'kglStagger 0.5s cubic-bezier(0.175,0.885,0.32,1.275) forwards'
         }}>
           <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0, background:'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%)', pointerEvents:'none' }} />
-          <div style={{ fontSize: '4rem', marginBottom: '0.8rem', position: 'relative', zIndex: 2 }}>ðŸŽ‰</div>
-          <h2 style={{ fontSize: '1.6rem', color: '#fff', marginBottom: '0.3rem', fontWeight: 800, position: 'relative', zIndex: 2 }}>Â¡Recompensas!</h2>
+          <div style={{ fontSize: '4rem', marginBottom: '0.8rem', position: 'relative', zIndex: 2 }}>🎉</div>
+          <h2 style={{ fontSize: '1.6rem', color: '#fff', marginBottom: '0.3rem', fontWeight: 800, position: 'relative', zIndex: 2 }}>¡Recompensas!</h2>
           <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.9)', fontWeight: 700, marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>+{currentLevel.reward} XP / +{currentLevel.reward} Monedas</p>
 
           <button onClick={() => navigate(userRole?.toLowerCase()?.trim() === 'hombre' ? '/hombre' : '/mujer')} style={{

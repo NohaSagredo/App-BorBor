@@ -1,8 +1,19 @@
 import React from 'react';
-import { Coins } from 'lucide-react';
+import { Coins, Palette } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from './ThemeProvider';
 
-export default function TopAppBar({ avatarUrl, level = 1, coins = 0 }) {
+export default function TopAppBar({ avatarUrl, level = 1, coins = 0, homeRoute = '/mujer' }) {
+  const navigate = useNavigate();
+  const { themeId, setTheme, themes } = useTheme();
+
+  const cycleTheme = () => {
+    const themeIds = Object.keys(themes);
+    const nextIndex = (themeIds.indexOf(themeId) + 1) % themeIds.length;
+    setTheme(themeIds[nextIndex]);
+  };
+
   return (
     <motion.header
       initial={{ y: -60, opacity: 0 }}
@@ -26,17 +37,32 @@ export default function TopAppBar({ avatarUrl, level = 1, coins = 0 }) {
         boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
       }}
     >
-      {/* Avatar + Level */}
+      {/* Avatar (clickeable → Perfil) + Level */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '50%',
-          padding: '2px',
-          background: 'linear-gradient(135deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
-          flexShrink: 0,
-          overflow: 'hidden',
-        }}>
+        <button
+          onClick={() => navigate('/perfil')}
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            padding: '2px',
+            background: 'linear-gradient(135deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
+            flexShrink: 0,
+            overflow: 'hidden',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.1)';
+            e.currentTarget.style.boxShadow = '0 0 12px rgba(244,63,94,0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+          aria-label="Ir a Perfil"
+        >
           <div style={{
             width: '100%',
             height: '100%',
@@ -57,7 +83,7 @@ export default function TopAppBar({ avatarUrl, level = 1, coins = 0 }) {
               <span style={{ fontSize: '1.2rem' }}>👤</span>
             )}
           </div>
-        </div>
+        </button>
         <span style={{
           fontSize: '11px',
           fontWeight: 700,
@@ -73,43 +99,84 @@ export default function TopAppBar({ avatarUrl, level = 1, coins = 0 }) {
         </span>
       </div>
 
-      {/* Brand */}
-      <div style={{
-        position: 'absolute',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-        fontSize: '1.3rem',
-        fontWeight: 800,
-        letterSpacing: '-0.03em',
-        background: 'linear-gradient(90deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        whiteSpace: 'nowrap',
-      }}>
-        BorBor
-      </div>
-
-      {/* Coins */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '5px',
-        background: 'rgba(255,255,255,0.07)',
-        padding: '5px 12px',
-        borderRadius: '20px',
-        border: '1px solid rgba(255,255,255,0.10)',
-      }}>
-        <Coins size={14} style={{ color: '#fbbf24' }} strokeWidth={2.5} />
-        <span style={{
+      {/* Brand (clickeable → Inicio) */}
+      <button
+        onClick={() => navigate(homeRoute)}
+        style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '13px',
-          fontWeight: 700,
-          color: '#f1f5f9',
+          fontSize: '1.3rem',
+          fontWeight: 800,
+          letterSpacing: '-0.03em',
+          background: 'linear-gradient(90deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          whiteSpace: 'nowrap',
+          border: 'none',
+          cursor: 'pointer',
+          padding: 0,
+          transition: 'opacity 0.2s ease',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.75'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+        aria-label="Ir a Inicio"
+      >
+        BorBor
+      </button>
+
+      {/* Theme Toggle + Coins */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Theme Cycle Button */}
+        <button
+          onClick={cycleTheme}
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.14)';
+            e.currentTarget.style.transform = 'rotate(30deg) scale(1.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+            e.currentTarget.style.transform = 'rotate(0) scale(1)';
+          }}
+          aria-label="Cambiar Tema"
+        >
+          <Palette size={14} style={{ color: 'var(--color-accent, #c084fc)' }} strokeWidth={2.2} />
+        </button>
+
+        {/* Coins */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          background: 'rgba(255,255,255,0.07)',
+          padding: '5px 12px',
+          borderRadius: '20px',
+          border: '1px solid rgba(255,255,255,0.10)',
         }}>
-          {coins.toLocaleString()}
-        </span>
+          <Coins size={14} style={{ color: '#fbbf24' }} strokeWidth={2.5} />
+          <span style={{
+            fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+            fontSize: '13px',
+            fontWeight: 700,
+            color: '#f1f5f9',
+          }}>
+            {coins.toLocaleString()}
+          </span>
+        </div>
       </div>
     </motion.header>
   );

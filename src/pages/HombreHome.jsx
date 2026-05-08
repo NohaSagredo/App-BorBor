@@ -589,7 +589,7 @@ export default function HombreHome() {
               🎨
             </button>
             <button
-              onClick={() => window.location.href='/perfil'}
+              onClick={() => window.location.href='/App-BorBor/perfil'}
               style={{
                 width: 40, height: 40, borderRadius: '50%',
                 background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)',

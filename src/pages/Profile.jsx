@@ -61,7 +61,7 @@ export default function Profile() {
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), { name: newName });
       setUserData(prev => ({ ...prev, name: newName }));
-      alert('Nombre actualizado correctamente. âœ…');
+      alert('Nombre actualizado correctamente. ✅');
     } catch (err) {
       console.error(err);
     }
@@ -94,12 +94,12 @@ export default function Profile() {
       setUserData(prev => ({ ...prev, role: pendingNewRole, roleChanged: true }));
       setShowRoleAuth(false);
       setRoleChangePassword('');
-      alert('Â¡Tipo de perfil cambiado exitosamente!');
+      alert('¡Tipo de perfil cambiado exitosamente!');
       navigate(pendingNewRole === 'mujer' ? '/mujer' : '/hombre');
       
     } catch (err) {
       console.error(err);
-      alert('ContraseÃ±a incorrecta o hubo un error de verificaciÃ³n.');
+      alert('Contraseña incorrecta o hubo un error de verificación.');
     }
   };
 
@@ -138,7 +138,7 @@ export default function Profile() {
               photoURL,
               photoHistory: [...(prev.photoHistory || []), newPhotoEntry]
             }));
-            alert('Foto de perfil actualizada exitosamente. âœ¨');
+            alert('Foto de perfil actualizada exitosamente. ✨');
           } catch (err) {
             console.error(err);
             alert('Error al guardar la foto.');
@@ -151,7 +151,7 @@ export default function Profile() {
       reader.readAsDataURL(file);
     } catch (err) {
       console.error(err);
-      alert('Error procesando tu foto. IntÃ©ntalo mÃ¡s tarde.');
+      alert('Error procesando tu foto. Inténtalo más tarde.');
       setUploadLoading(false);
     }
   };
@@ -159,13 +159,13 @@ export default function Profile() {
   const handleLinkPartner = async (e) => {
     e.preventDefault();
     setLinkError(''); setLinkSuccess('');
-    if (linkInput.length !== 6) { setLinkError('El cÃ³digo debe tener 6 caracteres.'); return; }
+    if (linkInput.length !== 6) { setLinkError('El código debe tener 6 caracteres.'); return; }
 
     try {
       const q = query(collection(db, 'users'), where('linkCode', '==', linkInput.toUpperCase()));
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty) { setLinkError('No se encontrÃ³ cuenta con ese cÃ³digo.'); return; }
+      if (querySnapshot.empty) { setLinkError('No se encontró cuenta con ese código.'); return; }
 
       const partnerDoc = querySnapshot.docs[0];
       const partnerObj = partnerDoc.data();
@@ -180,7 +180,7 @@ export default function Profile() {
         linkedPartnerId: user.uid
       });
 
-      setLinkSuccess(`Â¡VinculaciÃ³n exitosa con ${partnerObj.name}!`);
+      setLinkSuccess(`¡Vinculación exitosa con ${partnerObj.name}!`);
       setUserData(prev => ({ ...prev, linkedPartnerId: partnerObj.uid }));
       setPartnerData(partnerObj);
       setLinkInput('');
@@ -192,7 +192,7 @@ export default function Profile() {
   };
 
   const handleUnlink = async () => {
-    if (!window.confirm("Â¿Seguro que deseas desvincular a tu pareja actual?")) return;
+    if (!window.confirm("¿Seguro que deseas desvincular a tu pareja actual?")) return;
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), { linkedPartnerId: '' });
       if (partnerData?.uid) {
@@ -200,7 +200,7 @@ export default function Profile() {
       }
       setPartnerData(null);
       setUserData(prev => ({ ...prev, linkedPartnerId: '' }));
-      alert("DesvinculaciÃ³n exitosa.");
+      alert("Desvinculación exitosa.");
     } catch (err) {
       console.error(err);
     }
@@ -210,12 +210,12 @@ export default function Profile() {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!window.confirm("Â¿Importar historial de ciclos?")) {
+    if (!window.confirm("¿Importar historial de ciclos?")) {
        event.target.value = null;
        return;
     }
 
-    setImportStatus('â³ Leyendo archivo...');
+    setImportStatus('⏳ Leyendo archivo...');
     
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -247,13 +247,13 @@ export default function Profile() {
             const userSnap = await getDoc(userRef);
             let currentLogs = userSnap.data()?.dailyLogs || {};
             await updateDoc(userRef, { dailyLogs: { ...currentLogs, ...logsToUpload } });
-            setImportStatus(`âœ… ImportaciÃ³n completada: ${Object.keys(logsToUpload).length} dÃ­as agregados.`);
+            setImportStatus(`✅ Importación completada: ${Object.keys(logsToUpload).length} días agregados.`);
         } else {
-            setImportStatus('â„¹ï¸ No se encontraron registros de sangrado compatibles.');
+            setImportStatus('ℹ️ No se encontraron registros de sangrado compatibles.');
         }
       } catch (err) {
         console.error(err);
-        setImportStatus('âŒ Error al procesar el archivo. Formato invÃ¡lido.');
+        setImportStatus('❌ Error al procesar el archivo. Formato inválido.');
       }
       event.target.value = null;
     };
@@ -331,7 +331,7 @@ export default function Profile() {
       <div style={{ position:'absolute', top:'-5%', right:'-10%', width:200, height:200, borderRadius:'50%', background:'radial-gradient(circle, var(--color-primary), transparent 70%)', opacity:0.08, animation:'profOrb1 14s ease-in-out infinite', pointerEvents:'none' }} />
       <div style={{ position:'absolute', bottom:'15%', left:'-12%', width:220, height:220, borderRadius:'50%', background:'radial-gradient(circle, var(--color-secondary), transparent 70%)', opacity:0.06, animation:'profOrb2 18s ease-in-out infinite', pointerEvents:'none' }} />
 
-      {/* BotÃ³n Volver */}
+      {/* Botón Volver */}
       <button onClick={() => navigate(-1)} style={{
         background: 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)',
         border: '1px solid rgba(255,255,255,0.1)', borderRadius: '14px',
@@ -343,7 +343,7 @@ export default function Profile() {
         <ArrowLeft size={15} /> Volver
       </button>
 
-      {/* â•â•â• HERO HEADER â•â•â• */}
+      {/* ═══ HERO HEADER ═══ */}
       <div style={{
         borderRadius: '26px', padding: '2rem 1.5rem',
         marginBottom: '1.5rem', textAlign: 'center',
@@ -372,7 +372,7 @@ export default function Profile() {
             ) : userData?.photoURL ? (
               <img src={userData.photoURL} alt="Perfil" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             ) : (
-              userData?.role === 'mujer' ? 'ðŸŒ¸' : 'ðŸ‘¨'
+              userData?.role === 'mujer' ? '🌸' : '👨'
             )}
           </div>
           <div style={{
@@ -401,21 +401,21 @@ export default function Profile() {
         }} />
         <div style={{ display: 'flex', gap: '8px', marginTop: '0.8rem', position: 'relative', zIndex: 2 }}>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
-            <span style={{ fontSize:'0.95rem' }}>{userData?.role === 'mujer' ? 'ðŸŒ¸' : 'ðŸ’ª'}</span>
+            <span style={{ fontSize:'0.95rem' }}>{userData?.role === 'mujer' ? '🌸' : '💪'}</span>
             <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:700 }}>{userData?.role === 'mujer' ? 'Mujer' : 'Hombre'}</span>
           </div>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
-            <span style={{ fontSize:'0.95rem' }}>{userData?.linkedPartnerId ? 'ðŸ’•' : 'ðŸ”—'}</span>
+            <span style={{ fontSize:'0.95rem' }}>{userData?.linkedPartnerId ? '💕' : '🔗'}</span>
             <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:700 }}>{userData?.linkedPartnerId ? 'Vinculado' : 'Sin pareja'}</span>
           </div>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
-            <span style={{ fontSize:'0.95rem' }}>ðŸ’°</span>
+            <span style={{ fontSize:'0.95rem' }}>💰</span>
             <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:700 }}>{userData?.kegelCoins || 0}</span>
           </div>
         </div>
       </div>
 
-      {/* â•â•â• Admin Access â•â•â• */}
+      {/* ═══ Admin Access ═══ */}
       {(userData?.role === 'admin') && (
         <div className="prof-section-card" style={{
           border: '1.5px solid rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.04)',
@@ -427,7 +427,7 @@ export default function Profile() {
             </div>
             Acceso Administrativo
           </div>
-          <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1rem', marginTop: 0 }}>GestiÃ³n de plataforma, usuarios y mÃ©tricas.</p>
+          <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '1rem', marginTop: 0 }}>Gestión de plataforma, usuarios y métricas.</p>
           <button onClick={() => navigate('/admin')} style={{
             width: '100%', padding: '0.9rem', background: 'linear-gradient(135deg, #f59e0b, #d97706)',
             color: '#fff', border: 'none', borderRadius: '14px', cursor: 'pointer',
@@ -439,14 +439,14 @@ export default function Profile() {
         </div>
       )}
 
-      {/* â•â•â• Separador â•â•â• */}
+      {/* ═══ Separador ═══ */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0.5rem 0 1rem' }}>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, var(--color-primary), transparent)' }} />
-        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>ConfiguraciÃ³n</span>
+        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Configuración</span>
         <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, var(--color-primary), transparent)' }} />
       </div>
 
-      {/* â•â•â• Nombre y Rol â•â•â• */}
+      {/* ═══ Nombre y Rol ═══ */}
       <div className="prof-section-card" style={{ animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s both' }}>
         <div className="prof-section-header">
           <div className="prof-section-icon" style={{ background: 'rgba(var(--color-primary-rgb, 244, 63, 94), 0.1)' }}>
@@ -511,12 +511,12 @@ export default function Profile() {
         {/* Divider interno */}
         <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--glass-border), transparent)', margin: '1.2rem 0' }} />
 
-        <h4 style={{ color: 'var(--color-text-main)', margin: '0 0 0.8rem', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>âœ¨ Fondo Animado</h4>
+        <h4 style={{ color: 'var(--color-text-main)', margin: '0 0 0.8rem', fontSize: '0.95rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>✨ Fondo Animado</h4>
         <div style={{ display: 'flex', gap: '8px' }}>
           {[
             { key: 'none', label: 'Apagado' },
             { key: 'aura', label: 'Aura' },
-            { key: 'particles', label: 'LuciÃ©rnagas' }
+            { key: 'particles', label: 'Luciérnagas' }
           ].map(opt => (
             <button key={opt.key} onClick={() => setAnimMode(opt.key)} className="prof-anim-btn"
               style={{
@@ -532,14 +532,14 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* â•â•â• Importar Datos â•â•â• */}
+      {/* ═══ Importar Datos ═══ */}
       {userData?.role === 'mujer' && (
         <div className="prof-section-card" style={{ animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.35s both' }}>
           <div className="prof-section-header">
             <div className="prof-section-icon" style={{ background: 'rgba(16,185,129,0.1)' }}>
               <FileUp size={18} color="#10b981" />
             </div>
-            Importar Datos ClÃ­nicos
+            Importar Datos Clínicos
           </div>
           <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', margin: '0 0 1rem' }}>Sube tu archivo de respaldo de rastreadores externos (ej. Clover) para integrar tu historial menstrual.</p>
           <label style={{
@@ -556,13 +556,13 @@ export default function Profile() {
         </div>
       )}
 
-      {/* â•â•â• VÃ­nculo de Pareja â•â•â• */}
+      {/* ═══ Vínculo de Pareja ═══ */}
       <div className="prof-section-card" style={{ animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.4s both' }}>
         <div className="prof-section-header">
           <div className="prof-section-icon" style={{ background: 'rgba(236,72,153,0.1)' }}>
             <Link2 size={18} color="#ec4899" />
           </div>
-          VÃ­nculo de Pareja
+          Vínculo de Pareja
         </div>
 
         {userData?.linkedPartnerId && (
@@ -573,7 +573,7 @@ export default function Profile() {
               background: 'rgba(236,72,153,0.06)', border: '1px solid rgba(236,72,153,0.12)',
               marginBottom: '0.8rem'
             }}>
-              <span style={{ fontSize: '1.3rem' }}>ðŸ’•</span>
+              <span style={{ fontSize: '1.3rem' }}>💕</span>
               <div>
                 <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', display: 'block' }}>Vinculad@ con</span>
                 <strong style={{ color: 'var(--color-text-main)', fontSize: '0.95rem' }}>{partnerData?.name || 'Cargando...'}</strong>
@@ -594,21 +594,21 @@ export default function Profile() {
           {userData?.role === 'mujer' ? (
             <>
               <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '0.8rem', marginTop: 0, fontWeight: 600 }}>
-                {userData?.linkedPartnerId ? 'Vincular nueva cuenta' : 'Comparte tu cÃ³digo con tu pareja:'}
+                {userData?.linkedPartnerId ? 'Vincular nueva cuenta' : 'Comparte tu código con tu pareja:'}
               </p>
               <div style={{
                 padding: '1rem', borderRadius: '16px', textAlign: 'center',
                 background: 'rgba(var(--color-primary-rgb,244,63,94),0.05)',
                 border: '1.5px dashed rgba(var(--color-primary-rgb,244,63,94),0.25)'
               }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Tu cÃ³digo de acceso</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Tu código de acceso</span>
                 <strong style={{ fontSize: '1.8rem', letterSpacing: '6px', color: 'var(--color-text-main)', fontFamily: 'monospace' }}>{userData?.linkCode || '------'}</strong>
               </div>
             </>
           ) : (
             <form onSubmit={handleLinkPartner}>
               <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '0.8rem', marginTop: 0, fontWeight: 600 }}>
-                {userData?.linkedPartnerId ? 'Vincular otra cuenta' : 'Ingresa el cÃ³digo de 6 caracteres:'}
+                {userData?.linkedPartnerId ? 'Vincular otra cuenta' : 'Ingresa el código de 6 caracteres:'}
               </p>
               <input
                 type="text" maxLength={6} value={linkInput}
@@ -627,7 +627,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* â•â•â• Cerrar SesiÃ³n â•â•â• */}
+      {/* ═══ Cerrar Sesión ═══ */}
       <button onClick={() => signOut(auth)} style={{
         width: '100%', padding: '1rem', background: 'rgba(239,68,68,0.06)',
         color: '#ef4444', border: '1.5px solid rgba(239,68,68,0.2)',
@@ -636,10 +636,10 @@ export default function Profile() {
         transition: 'all 0.2s ease',
         animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.5s both'
       }}>
-        <LogOut size={17} /> Cerrar SesiÃ³n Segura
+        <LogOut size={17} /> Cerrar Sesión Segura
       </button>
 
-      {/* â•â•â• Role Change Auth Modal â•â•â• */}
+      {/* ═══ Role Change Auth Modal ═══ */}
       {showRoleAuth && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', backdropFilter: 'blur(8px)' }}>
           <div style={{
@@ -657,13 +657,13 @@ export default function Profile() {
             }}>
               <Shield size={26} color="#fff" />
             </div>
-            <h2 style={{ color: 'var(--color-text-highlight)', margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: 800 }}>VerificaciÃ³n de Seguridad</h2>
+            <h2 style={{ color: 'var(--color-text-highlight)', margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: 800 }}>Verificación de Seguridad</h2>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1.2rem', lineHeight: 1.5 }}>
               Cambio a <strong>{pendingNewRole === 'mujer' ? 'Mujer' : 'Hombre / Pareja'}</strong>.
-              <br/><span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem' }}>Â¡Este cambio es definitivo y solo se permite una vez!</span>
+              <br/><span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem' }}>¡Este cambio es definitivo y solo se permite una vez!</span>
             </p>
             <input
-              type="password" placeholder="Ingresa tu contraseÃ±a actual"
+              type="password" placeholder="Ingresa tu contraseña actual"
               value={roleChangePassword} onChange={e => setRoleChangePassword(e.target.value)}
               className="prof-input" style={{ marginBottom: '1.2rem' }}
             />

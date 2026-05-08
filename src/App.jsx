@@ -60,7 +60,7 @@ function AppContent() {
       paddingBottom: hideNavbars ? '0px' : '80px'
     }}>
       <GlobalBackground />
-      {!hideNavbars && <TopAppBar avatarUrl={userData?.photoURL} coins={userData?.kegelCoins || 0} level={currentLevel} />}
+      {!hideNavbars && <TopAppBar avatarUrl={userData?.photoURL} coins={userData?.kegelCoins || 0} level={currentLevel} homeRoute={homeRoute} />}
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/auth" element={<Auth />} />
