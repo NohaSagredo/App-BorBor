@@ -1,0 +1,97 @@
+﻿
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\BottomNavBar.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\DailyCheckInModal.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\ThemeProvider.jsx
+  354:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\TopAppBar.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\ZenAudio.jsx
+   79:13  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+   79:16  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  138:56  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  138:59  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  189:13  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  189:16  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  251:55  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  251:58  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  252:63  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  252:66  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  283:50  error    'e' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                no-unused-vars
+  283:53  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-empty
+  317:6   warning  React Hook useEffect has missing dependencies: 'startSound' and 'stopSound'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+  367:43  error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  365 |                 <div key={i} style={{
+  366 |                   width: '3px',
+> 367 |                   height: `${h + Math.sin(Date.now() / 300 + i) * 2}px`,
+      |                                           ^^^^^^^^^^ Cannot call impure function
+  368 |                   background: 'var(--color-primary)',
+  369 |                   borderRadius: '2px',
+  370 |                   animation: `audioBar 0.8s ease-in-out ${i * 0.1}s infinite alternate`  react-hooks/purity
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\AcademyModule.jsx
+  467:21  error  Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\AdminDashboard.jsx
+  521:75  error  Unnecessary escape character: \"  no-useless-escape
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Auth.jsx
+   1:27  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  11:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\HombreHome.jsx
+    1:38  error    'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                        no-unused-vars
+   16:11  error    'themeId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                              no-unused-vars
+   16:20  error    'setTheme' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                             no-unused-vars
+   16:30  error    'themes' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                               no-unused-vars
+   25:10  error    'todayLog' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                             no-unused-vars
+   29:10  error    'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                no-unused-vars
+   30:10  error    'successMsg' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                           no-unused-vars
+   31:10  error    'showLinkForm' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                         no-unused-vars
+  281:6   warning  React Hook useEffect has missing dependencies: 'activePartnerId' and 'navigate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  311:9   error    'handleLinkPartner' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                    no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\KegelsModule.jsx
+   10:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                no-unused-vars
+   86:13  error    'e' is defined but never used                                                                                no-unused-vars
+   86:16  error    Empty block statement                                                                                        no-empty
+  150:6   warning  React Hook useEffect has a missing dependency: 'playBeep'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  152:33  error    'score' is defined but never used                                                                            no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\MujerHome.jsx
+    2:10   error    'createPortal' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                          no-unused-vars
+    7:10   error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                no-unused-vars
+   19:11   error    'themeId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                      no-unused-vars
+   19:20   error    'setTheme' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                     no-unused-vars
+   19:30   error    'themes' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                       no-unused-vars
+   22:10   error    'partnerData' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                  no-unused-vars
+  302:6    warning  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  430:44   error    'pr' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                           no-unused-vars
+  430:52   error    'pxp' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                          no-unused-vars
+  626:82   error    'cLength' is defined but never used                                                                          no-unused-vars
+  630:108  error    'dCycle' is not defined                                                                                      no-undef
+  630:141  error    'dCycle' is not defined                                                                                      no-undef
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Profile.jsx
+    2:20   error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+    4:10   error  'ref' is defined but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+    4:15   error  'uploadBytes' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+    4:28   error  'getDownloadURL' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   10:10   error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u          no-unused-vars
+  201:101  error  'e' is defined but never used                                                          no-unused-vars
+  201:104  error  Empty block statement                                                                  no-empty
+  230:18   error  'normalParseError' is defined but never used                                           no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Welcome.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Ô£û 58 problems (54 errors, 4 warnings)
+

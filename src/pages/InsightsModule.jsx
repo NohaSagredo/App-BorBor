@@ -78,7 +78,7 @@ export default function InsightsModule() {
   if (loading) return <GlobalLoader text="Analizando históricos..." />;
 
   return (
-    <div style={{ padding: '1.5rem', minHeight: '100vh', display: 'flex', flexDirection: 'column', maxWidth: '500px', margin: '0 auto', position: 'relative', overflow: 'hidden' }}>
+    <div className="app-wrapper responsive-container" style={{ display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes insightOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(25px,-20px) scale(1.1)} }

@@ -268,7 +268,7 @@ export default function AdminDashboard() {
   const cal = generateCalendarDays();
 
   return (
-    <div style={{ padding: '1.5rem', minHeight: '100vh', background: '#0f172a', color: '#f8fafc', paddingBottom: '4rem', position: 'relative', overflow: 'hidden' }}>
+    <div className="app-wrapper" style={{ padding: '0 24px', background: '#0f172a', color: '#f8fafc', position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes admOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(15px,-20px) scale(1.08)} }
@@ -518,7 +518,7 @@ export default function AdminDashboard() {
 
             {selectedDayData.log ? (
               <pre style={{ whiteSpace: 'pre-wrap', color: '#e2e8f0', fontSize: '0.82rem', background: 'rgba(15,23,42,0.8)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', lineHeight: 1.6 }}>
-                {JSON.stringify(selectedDayData.log, null, 2).replace(/[{}\"]/g, '').trim()}
+                {JSON.stringify(selectedDayData.log, null, 2).replace(/[{}"]/g, '').trim()}
               </pre>
             ) : (
               <div style={{ background: 'rgba(15,23,42,0.8)', padding: '1.5rem', borderRadius: '12px', color: '#475569', textAlign: 'center', fontSize: '0.88rem', border: '1px solid rgba(255,255,255,0.04)' }}>

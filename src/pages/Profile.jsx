@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db, storage } from '../firebase';
+import { auth, db } from '../firebase';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, arrayUnion } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged, signOut, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../components/ThemeProvider';
@@ -197,7 +196,7 @@ export default function Profile() {
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), { linkedPartnerId: '' });
       if (partnerData?.uid) {
-         try { await updateDoc(doc(db, 'users', partnerData.uid), { linkedPartnerId: '' }); } catch(e) {}
+         try { await updateDoc(doc(db, 'users', partnerData.uid), { linkedPartnerId: '' }); } catch { /* best-effort unlink */ }
       }
       setPartnerData(null);
       setUserData(prev => ({ ...prev, linkedPartnerId: '' }));
@@ -226,7 +225,7 @@ export default function Profile() {
         
         try {
            data = JSON.parse(text);
-        } catch (normalParseError) {
+        } catch {
            const cleanBase64 = text.replace(/~./g, '');
            const decodedText = atob(cleanBase64);
            data = JSON.parse(decodedText);
@@ -264,7 +263,7 @@ export default function Profile() {
   if (loading) return <GlobalLoader />;
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: '500px', margin: '0 auto', minHeight: '100vh', paddingBottom: '90px', position: 'relative', overflow: 'hidden' }}>
+    <div className="app-wrapper responsive-container" style={{ position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes profOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-18px) scale(1.08)} }
@@ -472,15 +471,15 @@ export default function Profile() {
           className="prof-input"
           style={{ appearance: 'none', opacity: userData?.roleChanged ? 0.5 : 1 }}
         >
-          <option value="mujer">ðŸŒ¸ Mujer</option>
-          <option value="hombre">ðŸ’ª Hombre / Pareja</option>
+          <option value="mujer">🌸 Mujer</option>
+          <option value="hombre">💪 Hombre / Pareja</option>
         </select>
         {userData?.roleChanged && (
-          <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '0.4rem', display: 'block' }}>âš ï¸ Cambio de rol ya utilizado.</span>
+          <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '0.4rem', display: 'block' }}>Cambio de rol ya utilizado.</span>
         )}
       </div>
 
-      {/* â•â•â• Apariencia â•â•â• */}
+      {/* Apariencia */}
       <div className="prof-section-card" style={{ animation: 'profStagger 0.6s cubic-bezier(0.16,1,0.3,1) 0.25s both' }}>
         <div className="prof-section-header">
           <div className="prof-section-icon" style={{ background: 'rgba(139,92,246,0.1)' }}>
@@ -618,8 +617,8 @@ export default function Profile() {
                 className="prof-input"
                 style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem', marginBottom: '0.8rem', textTransform: 'uppercase' }}
               />
-              {linkError && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>âš ï¸ {linkError}</p>}
-              {linkSuccess && <p style={{ color: '#10b981', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>âœ… {linkSuccess}</p>}
+              {linkError && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>{linkError}</p>}
+              {linkSuccess && <p style={{ color: '#10b981', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>{linkSuccess}</p>}
               <button type="submit" className="prof-btn-primary" style={{ width: '100%' }}>
                 <Link2 size={16} /> Vincular ahora
               </button>

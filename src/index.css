@@ -1,4 +1,16 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
+@layer utilities {
+  .glow-cyan { box-shadow: 0 0 20px rgba(34, 211, 238, 0.4), inset 0 0 10px rgba(34, 211, 238, 0.2); }
+  .bg-glass { background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(16px); }
+  .bg-glass-heavy { background: linear-gradient(180deg, rgba(20, 18, 24, 0.8) 0%, rgba(20, 18, 24, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(24px); }
+  
+  .progress-ring__circle { transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+  
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
 
 @keyframes ripple-effect {
   0% { box-shadow: 0 0 0 0 rgba(var(--color-primary-rgb, 244, 63, 94), 0.5); }
@@ -10,18 +22,26 @@
 }
 
 /* Base Utilidades Recuperadas */
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Base oscura siempre activa para que Glassmorphism funcione */
+  background-color: #0f0d13 !important;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -34,11 +54,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.05); /* Cristal Oscuro para temas deep */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  border-radius: 20px;
+}
+
+/* Variante más oscura para tarjetas sobre fondo oscuro */
+.card-glass {
+  background: rgba(15, 13, 19, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
   border-radius: 20px;
 }
 

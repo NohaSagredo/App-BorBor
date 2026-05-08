@@ -76,7 +76,9 @@ function startRain(audioCtx, gainNode) {
     try {
       source.stop();
       lfo.stop();
-    } catch(e) {}
+    } catch {
+      // ignore
+    }
   };
 }
 
@@ -135,7 +137,7 @@ function startBowls(audioCtx, gainNode) {
 
   return () => {
     clearInterval(schedulerInterval);
-    oscillators.forEach(o => { try { o.stop(); } catch(e) {} });
+    oscillators.forEach(o => { try { o.stop(); } catch { /* ignore */ } });
   };
 }
 
@@ -186,7 +188,7 @@ function startOcean(audioCtx, gainNode) {
       noiseSource.stop();
       lfo.stop();
       filterLfo.stop();
-    } catch(e) {}
+    } catch { /* ignore */ }
   };
 }
 
@@ -248,8 +250,8 @@ function startForest(audioCtx, gainNode) {
 
   return () => {
     clearInterval(cricketInterval);
-    try { noiseSource.stop(); windLfo.stop(); } catch(e) {}
-    cricketOscillators.forEach(o => { try { o.stop(); } catch(e) {} });
+    try { noiseSource.stop(); windLfo.stop(); } catch { /* ignore */ }
+    cricketOscillators.forEach(o => { try { o.stop(); } catch { /* ignore */ } });
   };
 }
 
@@ -280,7 +282,7 @@ export default function ZenAudio({ isPlaying, onTogglePlay }) {
       cleanupRef.current = null;
     }
     if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-      try { audioCtxRef.current.close(); } catch(e) {}
+      try { audioCtxRef.current.close(); } catch { /* ignore */ }
       audioCtxRef.current = null;
     }
   }, []);
@@ -301,7 +303,7 @@ export default function ZenAudio({ isPlaying, onTogglePlay }) {
       if (starter) {
         cleanupRef.current = starter(ctx, gain);
       }
-    } catch(e) {
+    } catch (e) {
       console.warn('Web Audio not supported:', e);
     }
   }, [selectedSound, volume, isMuted, stopSound]);
@@ -314,7 +316,7 @@ export default function ZenAudio({ isPlaying, onTogglePlay }) {
       stopSound();
     }
     return stopSound;
-  }, [isPlaying, selectedSound]);
+  }, [isPlaying, selectedSound, startSound, stopSound]);
 
   // Volume/mute changes
   useEffect(() => {
@@ -364,7 +366,7 @@ export default function ZenAudio({ isPlaying, onTogglePlay }) {
               {[3, 5, 4, 6, 3].map((h, i) => (
                 <div key={i} style={{
                   width: '3px',
-                  height: `${h + Math.sin(Date.now() / 300 + i) * 2}px`,
+                  height: `${h}px`,
                   background: 'var(--color-primary)',
                   borderRadius: '2px',
                   animation: `audioBar 0.8s ease-in-out ${i * 0.1}s infinite alternate`

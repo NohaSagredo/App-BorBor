@@ -14,7 +14,6 @@ export default function MujerHome() {
   const navigate = useNavigate();
   const { themeId, setTheme, themes } = useTheme();
   const [userData, setUserData] = useState(null);
-  const [partnerData, setPartnerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastPeriodStart, setLastPeriodStart] = useState('');
   const [phase, setPhase] = useState('Ninguna registrada');
@@ -294,14 +293,6 @@ export default function MujerHome() {
              setSymptoms(fetchedLogs[todayStr]);
           }
 
-          // Si ya tiene pareja vinculada, traer sus datos
-          if (data.linkedPartnerId) {
-            const partnerDocRef = doc(db, 'users', data.linkedPartnerId);
-            const partnerSnap = await getDoc(partnerDocRef);
-            if (partnerSnap.exists()) {
-              setPartnerData(partnerSnap.data());
-            }
-          }
 
           // Escuchar Notificaciones In-App
           const notifRef = collection(db, 'users', user.uid, 'notifications');
@@ -324,7 +315,7 @@ export default function MujerHome() {
       unsubscribe();
       unsubNotifs();
     };
-  }, []);
+  }, [navigate]);
 
   const calculatePhase = (startDateStr, cycleLength = 28, logs = {}) => {
     if (!startDateStr) return;
@@ -688,7 +679,7 @@ export default function MujerHome() {
   }
 
   return (
-    <div className="app-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div className="app-wrapper responsive-container" style={{ position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes mhOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-15px) scale(1.08)} }
@@ -806,7 +797,7 @@ export default function MujerHome() {
         })()}
       </div>
 
-      <div className="responsive-container">
+      <div>
         <div className="dashboard-grid">
           <div className="dashboard-col">
 
@@ -842,7 +833,7 @@ export default function MujerHome() {
 
           <div 
              className="glass-panel" 
-             style={{ padding: '1.5rem', background: 'var(--color-surface)', overflow: 'hidden', touchAction: 'pan-y', userSelect: 'none' }}
+             style={{ padding: '1.5rem', overflow: 'hidden', touchAction: 'pan-y', userSelect: 'none' }}
              onClickCapture={() => setLastInteraction(Date.now())}
              onPointerDownCapture={(e) => {
                setTouchEndX(null);

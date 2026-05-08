@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, sendNotification } from '../firebase';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, getDocs, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -22,11 +22,6 @@ export default function HombreHome() {
   const [partnerLogs, setPartnerLogs] = useState({});
   const [todayLog, setTodayLog] = useState(null);
   
-  // Vinculación
-  const [linkInput, setLinkInput] = useState('');
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [showLinkForm, setShowLinkForm] = useState(false);
 
   // Diccionario de Traducción Lógica -> UI
   const MIMOS_CATALOG = [
@@ -263,10 +258,8 @@ export default function HombreHome() {
 
           setLinkedUsers(partnersArray);
           
-          if (partnersArray.length > 0 && !activePartnerId) {
-             setActivePartnerId(partnersArray[0].uid);
-          } else if (partnersArray.length === 0) {
-             setShowLinkForm(true);
+          if (partnersArray.length > 0) {
+             setActivePartnerId(prev => prev || partnersArray[0].uid);
           }
         }
       } catch (error) {
@@ -276,7 +269,7 @@ export default function HombreHome() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
 
   // Cargar datos de la pareja activa cuando cambie
   useEffect(() => {
@@ -306,50 +299,7 @@ export default function HombreHome() {
     fetchPartnerData();
   }, [activePartnerId]);
 
-  const handleLinkPartner = async (e) => {
-    e.preventDefault();
-    setError(''); setSuccessMsg('');
-    if (linkInput.length !== 6) { setError('El código debe tener 6 caracteres.'); return; }
 
-    try {
-      const q = query(collection(db, 'users'), where('linkCode', '==', linkInput.toUpperCase()), where('role', '==', 'mujer'));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) { setError('No se encontró usuaria con ese código.'); return; }
-
-      const partnerDoc = querySnapshot.docs[0];
-      const partnerObj = partnerDoc.data();
-      const user = auth.currentUser;
-      
-      // Si ya esta en el arreglo, saltar
-      if (linkedUsers.find(u => u.uid === partnerObj.uid)) {
-         setError('Ya estabas vinculado a esta cuenta.');
-         return;
-      }
-
-      await updateDoc(doc(db, 'users', user.uid), {
-        linkedPartnerId: partnerObj.uid, // Legacy primary
-        linkedPartners: arrayUnion({ uid: partnerObj.uid, name: partnerObj.name })
-      });
-
-      await updateDoc(doc(db, 'users', partnerObj.uid), {
-        linkedPartnerId: user.uid
-      });
-
-      setSuccessMsg(`¡Vinculación exitosa con ${partnerObj.name}!`);
-      
-      const newPartner = { uid: partnerObj.uid, name: partnerObj.name };
-      const newArr = [...linkedUsers, newPartner];
-      setLinkedUsers(newArr);
-      setActivePartnerId(partnerObj.uid);
-      setShowLinkForm(false);
-      setLinkInput('');
-
-    } catch (err) {
-      console.error(err);
-      setError('Error al intentar vincular.');
-    }
-  };
 
   const handleSendMimo = async (mimo) => {
     if (!userData || !activePartnerId) return;
@@ -570,7 +520,7 @@ export default function HombreHome() {
   if (loading) return <GlobalLoader text="Cargando tu espacio..." />;
 
   return (
-    <div className="app-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div className="app-wrapper responsive-container" style={{ position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes hhOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(18px,-15px) scale(1.08)} }
@@ -681,7 +631,7 @@ export default function HombreHome() {
       </div>
 
       {/* ═══ Acciones Rápidas ═══ */}
-      <div className="responsive-container" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '1.5rem' }}>
         <KegelConsistencyWidget logs={userData?.challengeLogs} themeColor="var(--color-primary)" />
         <div
           style={{
@@ -729,7 +679,7 @@ export default function HombreHome() {
 
       {/* Dashboard Activo */}
       {activePartnerId && partnerData && (
-        <div className="responsive-container dashboard-grid">
+        <div className="dashboard-grid">
           <div className="dashboard-col" style={{ marginTop: '1.5rem' }}>
           
            {/* Widget Próxima Ovulación Proyectada */}

@@ -11,10 +11,41 @@ import AcademyModule from './pages/AcademyModule';
 import AdminDashboard from './pages/AdminDashboard';
 import { ThemeProvider } from './components/ThemeProvider';
 import GlobalBackground from './components/GlobalBackground';
+import TopAppBar from './components/TopAppBar';
+import BottomNavBar from './components/BottomNavBar';
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
+import { LEVELS } from './utils/kegelLevels';
 
 function AppContent() {
   const location = useLocation();
   const isWide = ['/academia', '/admin', '/insights'].includes(location.pathname);
+  
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
+      } else {
+        setUserData(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const hideNavbars = ['/', '/auth', '/admin'].includes(location.pathname);
+  const homeRoute = userData?.role === 'Hombre' ? '/hombre' : '/mujer';
+
+  const userXp = userData?.xp || 0;
+  const currentLevelObj = [...LEVELS].reverse().find(l => l.xpRequired <= userXp) || LEVELS[0];
+  const currentLevel = currentLevelObj.id;
   
   return (
     <div className="app-root-wrapper" style={{ 
@@ -24,10 +55,12 @@ function AppContent() {
       background: 'transparent', 
       minHeight: '100vh', 
       position: 'relative', 
-      overflowX: 'hidden',
-      transition: 'max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+      transition: 'max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+      paddingTop: hideNavbars ? '0px' : '80px',
+      paddingBottom: hideNavbars ? '0px' : '80px'
     }}>
       <GlobalBackground />
+      {!hideNavbars && <TopAppBar avatarUrl={userData?.photoURL} coins={userData?.kegelCoins || 0} level={currentLevel} />}
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/auth" element={<Auth />} />
@@ -39,6 +72,7 @@ function AppContent() {
         <Route path="/academia" element={<AcademyModule />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
+      {!hideNavbars && <BottomNavBar homeRoute={homeRoute} />}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, CheckCircle, ChevronDown, ChevronUp, Award, Sparkles } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, ChevronDown, ChevronUp, Award, Sparkles, Search, SlidersHorizontal, PlayCircle, Clock, Bookmark } from 'lucide-react';
 import { auth, db } from '../firebase';
 import { doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -204,24 +204,24 @@ export default function AcademyModule() {
   const [expandedId, setExpandedId] = useState(null);
 
   // Progreso de lecturas
-  const [readLessons, setReadLessons] = useState([]);
+  const [readLessons, setReadLessons] = useState(() => {
+    const stored = localStorage.getItem('borbor-academy-progress');
+    return stored ? JSON.parse(stored) : [];
+  });
 
   // Sistema de quizzes
-  const [passedQuizzes, setPassedQuizzes] = useState([]);
+  const [passedQuizzes, setPassedQuizzes] = useState(() => {
+    const storedQuizzes = localStorage.getItem('borbor-academy-quizzes');
+    return storedQuizzes ? JSON.parse(storedQuizzes) : [];
+  });
   const [showDeepStudy, setShowDeepStudy] = useState({});    // { lessonId: true/false }
   const [selectedAnswer, setSelectedAnswer] = useState({});   // { lessonId: index }
   const [quizFeedback, setQuizFeedback] = useState({});       // { lessonId: 'correct' | 'wrong' }
   const [coinAnimation, setCoinAnimation] = useState(null);   // { coins: N } o null
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    // 1. Cargar progreso de localStorage inicial
-    const stored = localStorage.getItem('borbor-academy-progress');
-    if (stored) setReadLessons(JSON.parse(stored));
-
-    const storedQuizzes = localStorage.getItem('borbor-academy-quizzes');
-    if (storedQuizzes) setPassedQuizzes(JSON.parse(storedQuizzes));
-
-    // 2. Comprobar rol de usuario validado
+    // Comprobar rol de usuario validado
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
@@ -295,8 +295,6 @@ export default function AcademyModule() {
       localStorage.setItem('borbor-academy-quizzes', JSON.stringify(updatedQuizzes));
 
       setCoinAnimation({ coins: lesson.quiz.reward });
-
-      // Persistir en Firebase
       if (auth.currentUser) {
         try {
           const userDocRef = doc(db, 'users', auth.currentUser.uid);
@@ -304,13 +302,10 @@ export default function AcademyModule() {
             academyQuizzes: updatedQuizzes,
             kegelCoins: increment(lesson.quiz.reward)
           });
-        } catch (err) {
-          console.error('Error actualizando quiz en Firebase:', err);
-        }
+        } catch (err) { console.error(err); }
       }
     } else {
       setQuizFeedback(prev => ({ ...prev, [lessonId]: 'wrong' }));
-      // Permitir intentar de nuevo después de 2 segundos
       setTimeout(() => {
         setQuizFeedback(prev => ({ ...prev, [lessonId]: null }));
         setSelectedAnswer(prev => ({ ...prev, [lessonId]: null }));
@@ -318,493 +313,118 @@ export default function AcademyModule() {
     }
   }, [passedQuizzes, quizFeedback]);
 
-  if (loading) {
-    return <GlobalLoader text="Cargando biblioteca..." />;
-  }
+  if (loading) return <GlobalLoader text="Cargando biblioteca..." />;
+
+  const filteredContent = contentList.filter(lesson => {
+    const matchesSearch = lesson.title.toLowerCase().includes(searchTerm.toLowerCase()) || lesson.summary.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
-    <div className="animate-fade-in academy-root" style={{ 
-      padding: '1.5rem', 
-      minHeight: '100vh', 
-      maxWidth: '1200px', 
-      margin: '0 auto', 
-      paddingBottom: '100px',
-      boxSizing: 'border-box'
-    }}>
+    <div className="relative z-10 pt-20 pb-32 px-4 md:px-8 max-w-7xl mx-auto font-sans animate-fade-in min-h-screen">
+      {coinAnimation && <CoinRewardAnimation coins={coinAnimation.coins} onDone={() => setCoinAnimation(null)} />}
 
-      {/* Animación de monedas */}
-      {coinAnimation && (
-        <CoinRewardAnimation coins={coinAnimation.coins} onDone={() => setCoinAnimation(null)} />
-      )}
+      <div className="mb-8 relative z-10">
+        <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-semibold">
+          <ArrowLeft size={16} /> Volver
+        </button>
 
-      {/* Estilos de la Hero Section */}
-      <style>{`
-        @keyframes academyFloat1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-12px) rotate(8deg)} }
-        @keyframes academyFloat2 { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-8px) scale(1.15)} }
-        @keyframes academyFloat3 { 0%,100%{transform:translateX(0) rotate(0deg)} 50%{transform:translateX(10px) rotate(-6deg)} }
-        @keyframes academyShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
-        @keyframes academyPulseRing { 0%,100%{opacity:0.7} 50%{opacity:1} }
-        .academy-hero-card {
-          position: relative;
-          border-radius: 28px;
-          padding: 2rem 1.5rem 1.5rem;
-          margin-bottom: 2rem;
-          overflow: hidden;
-          background: linear-gradient(145deg, var(--color-primary), var(--color-secondary));
-          box-shadow: 0 16px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(255,255,255,0.1) inset;
-        }
-        .academy-hero-card::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, rgba(255,255,255,0.06) 100%);
-          pointer-events: none;
-        }
-        .academy-hero-particle {
-          position: absolute;
-          border-radius: 50%;
-          pointer-events: none;
-          opacity: 0.25;
-        }
-        .academy-stat-chip {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 3px;
-          background: rgba(255,255,255,0.13);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.18);
-          border-radius: 16px;
-          padding: 0.65rem 0.6rem;
-          flex: 1;
-          min-width: 0;
-          transition: transform 0.2s ease, background 0.2s ease;
-        }
-        .academy-stat-chip:hover {
-          transform: translateY(-2px);
-          background: rgba(255,255,255,0.2);
-        }
-        .academy-lessons-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-        }
-        @media (min-width: 768px) {
-          .academy-lessons-grid {
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 24px !important;
-          }
-          .academy-hero-content {
-            flex-direction: row !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            text-align: left !important;
-          }
-          .academy-hero-stats {
-            max-width: 600px !important;
-          }
-        }
-      `}</style>
-
-      {/* Botón Volver */}
-      <button
-        onClick={() => navigate(-1)}
-        style={{
-          background: 'rgba(255,255,255,0.08)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '14px',
-          padding: '0.5rem 1rem',
-          fontSize: '0.9rem',
-          cursor: 'pointer',
-          marginBottom: '1.2rem',
-          color: 'var(--color-text-muted)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontWeight: 600,
-          transition: 'all 0.2s ease'
-        }}
-      >
-        <ArrowLeft size={16} /> Volver
-      </button>
-
-      {/* ═══ HERO BANNER ═══ */}
-      <div className="academy-hero-card">
-
-        {/* Partículas decorativas flotantes */}
-        <div className="academy-hero-particle" style={{ width: 50, height: 50, background: 'rgba(255,255,255,0.3)', top: 12, right: 20, animation: 'academyFloat1 4s ease-in-out infinite' }} />
-        <div className="academy-hero-particle" style={{ width: 30, height: 30, background: 'rgba(255,255,255,0.2)', top: 70, right: 80, animation: 'academyFloat2 5s ease-in-out infinite 0.5s' }} />
-        <div className="academy-hero-particle" style={{ width: 18, height: 18, background: 'rgba(255,255,255,0.25)', bottom: 60, left: 20, animation: 'academyFloat3 6s ease-in-out infinite 1s' }} />
-        <div className="academy-hero-particle" style={{ width: 40, height: 40, background: 'rgba(255,255,255,0.15)', bottom: 20, right: 40, animation: 'academyFloat1 7s ease-in-out infinite 2s' }} />
-
-        {/* Fila principal: Texto + Anillo de Progreso */}
-        <div className="academy-hero-content" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
-
-          {/* Columna Izquierda: Título */}
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '0.8rem' }}>
-              <div style={{
-                width: '56px', height: '56px', borderRadius: '18px',
-                background: 'rgba(255,255,255,0.2)',
-                backdropFilter: 'blur(10px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '1px solid rgba(255,255,255,0.3)',
-                boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
-              }}>
-                <BookOpen size={28} color="#fff" />
-              </div>
-              <div>
-                <h1 style={{ color: '#fff', fontSize: '2.2rem', margin: 0, fontWeight: 900, letterSpacing: '-0.8px', textShadow: '0 2px 10px rgba(0,0,0,0.2)' }}>
-                  Academia
-                </h1>
-                <div style={{ 
-                  background: 'rgba(255,255,255,0.2)', 
-                  padding: '2px 10px', 
-                  borderRadius: '20px', 
-                  fontSize: '0.7rem', 
-                  color: '#fff', 
-                  fontWeight: 700,
-                  display: 'inline-block',
-                  marginTop: '4px',
-                  textTransform: 'uppercase'
-                }}>
-                  Biblioteca de Salud ({role})
-                </div>
-              </div>
-            </div>
-            <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.95rem', margin: '0.5rem 0 0 0', lineHeight: 1.5, maxWidth: '450px' }}>
-              Explora lecciones diseñadas por expertos para el control anatómico y bienestar pélvico. Todo lo que necesitas saber en un solo lugar.
-            </p>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">Academy</h2>
+            <p className="text-slate-400 text-lg max-w-2xl leading-relaxed">Expande tu conocimiento con cursos curados sobre salud holística, anatomía y bienestar diario.</p>
           </div>
-
-          {/* Columna Derecha: Anillo SVG de progreso general */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div style={{ position: 'relative', width: '110px', height: '110px', flexShrink: 0 }}>
-              <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)', animation: 'academyPulseRing 3.5s ease-in-out infinite' }}>
-                <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
-                <circle cx="55" cy="55" r="48" fill="none" stroke="#fff" strokeWidth="8"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 48}`}
-                  strokeDashoffset={`${2 * Math.PI * 48 * (1 - progressRatio / 100)}`}
-                  style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
-                />
-              </svg>
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <span style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 900, lineHeight: 1 }}>{progressRatio}%</span>
-                <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.65rem', fontWeight: 700, marginTop: '2px', letterSpacing: '1px' }}>LEÍDO</span>
-              </div>
-            </div>
+          <div className="flex items-center gap-4 bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
+             <div className="relative w-16 h-16 flex-shrink-0">
+               <svg width="64" height="64" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)' }}>
+                 <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
+                 <circle cx="55" cy="55" r="48" fill="none" stroke="#cfbcff" strokeWidth="8"
+                   strokeLinecap="round" strokeDasharray={`${2 * Math.PI * 48}`} strokeDashoffset={`${2 * Math.PI * 48 * (1 - progressRatio / 100)}`}
+                   style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
+               </svg>
+               <div className="absolute inset-0 flex flex-col items-center justify-center">
+                 <span className="text-white text-lg font-bold leading-none">{progressRatio}%</span>
+               </div>
+             </div>
+             <div>
+               <div className="text-white font-bold text-lg">{readLessons.filter(id => contentList.some(c => c.id === id)).length}/{contentList.length} Lecciones</div>
+               <div className="text-emerald-400 font-semibold text-sm flex items-center gap-1">
+                 <CheckCircle size={14} /> {quizzesCompleted}/{totalQuizzes} Pruebas
+               </div>
+             </div>
           </div>
         </div>
+      </div>
 
-        {/* Separador shimmer */}
-        <div style={{
-          margin: '1.2rem 0 1rem 0',
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
-          backgroundSize: '200% 100%',
-          animation: 'academyShimmer 3s linear infinite'
-        }} />
-
-        {/* Fila de Stats */}
-        <div className="academy-hero-stats" style={{ display: 'flex', gap: '12px', position: 'relative', zIndex: 2, flexWrap: 'wrap' }}>
-          {/* Stat: Lecciones */}
-          <div className="academy-stat-chip">
-            <span style={{ fontSize: '1.2rem' }}>📖</span>
-            <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, lineHeight: 1 }}>
-              {readLessons.filter(id => contentList.some(c => c.id === id)).length}/{contentList.length}
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 600 }}>Lecciones</span>
-          </div>
-          {/* Stat: Pruebas */}
-          <div className="academy-stat-chip">
-            <span style={{ fontSize: '1.2rem' }}>🧠</span>
-            <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, lineHeight: 1 }}>
-              {quizzesCompleted}/{totalQuizzes}
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 600 }}>Pruebas</span>
-          </div>
-          {/* Stat: Maestría */}
-          <div className="academy-stat-chip">
-            <span style={{ fontSize: '1.2rem' }}>{quizzesCompleted === totalQuizzes && totalQuizzes > 0 ? '🏆' : '⭐'}</span>
-            <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, lineHeight: 1 }}>
-              {Math.round(((readLessons.filter(id => contentList.some(c => c.id === id)).length + quizzesCompleted) / (contentList.length + totalQuizzes)) * 100)}%
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', fontWeight: 600 }}>Maestría</span>
-          </div>
+      <div className="mb-8 relative group z-10">
+        <div className="relative flex items-center bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-xl">
+          <Search className="text-slate-400 mr-3" size={20} />
+          <input className="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-slate-500 outline-none text-base" placeholder="Buscar temas, ejercicios o anatomía..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
-
-        {/* Mensaje de completitud */}
-        {progressRatio === 100 && quizzesCompleted === totalQuizzes && totalQuizzes > 0 && (
-          <div className="animate-fade-in" style={{
-            marginTop: '1rem',
-            padding: '0.6rem',
-            background: 'rgba(255,255,255,0.15)',
-            borderRadius: '12px',
-            textAlign: 'center',
-            color: '#fff',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            backdropFilter: 'blur(4px)',
-            border: '1px solid rgba(255,255,255,0.2)'
-          }}>
-            🎓 ¡Máxima maestría alcanzada! Dominio completo.
-          </div>
-        )}
       </div>
 
-      {/* ═══ Separador con etiqueta ═══ */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.2rem' }}>
-        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, var(--color-primary), transparent)' }} />
-        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
-          Lecciones
-        </span>
-        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(270deg, var(--color-primary), transparent)' }} />
-      </div>
-
-      {/* Lista de Lecciones Expandibles */}
-      <div className="academy-lessons-grid">
-        {contentList.map((lesson) => {
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 relative z-10">
+        {filteredContent.map((lesson, index) => {
           const isExpanded = expandedId === lesson.id;
-          const isRead = readLessons.includes(lesson.id);
           const isQuizPassed = passedQuizzes.includes(lesson.id);
           const isDeepStudyOpen = showDeepStudy[lesson.id];
           const currentFeedback = quizFeedback[lesson.id];
           const currentSelected = selectedAnswer[lesson.id];
-
+          const gradients = ['from-cyan-900/80 to-blue-900/80', 'from-fuchsia-900/80 to-rose-900/80', 'from-violet-900/80 to-purple-900/80', 'from-emerald-900/80 to-teal-900/80', 'from-amber-900/80 to-orange-900/80'];
+          
           return (
-            <div
-              key={lesson.id}
-              className="glass-panel hover-scale"
-              style={{ padding: 0, overflow: 'hidden', border: isExpanded ? '2px solid var(--color-primary)' : '1px solid var(--glass-border)' }}
-            >
-              {/* Cabecera clickeable */}
-              <div
-                onClick={() => toggleLesson(lesson.id)}
-                style={{
-                  padding: '1.2rem',
-                  display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'space-between', alignItems: 'center',
-                  cursor: 'pointer',
-                  background: isExpanded ? 'rgba(var(--color-primary-rgb, 244, 63, 94), 0.05)' : 'transparent'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ fontSize: '1.5rem', opacity: isRead ? 0.7 : 1 }}>{lesson.icon}</div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--color-text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {lesson.title}
-                      {isRead && <CheckCircle size={14} color="#10b981" />}
-                      {isQuizPassed && <span style={{ fontSize: '0.7rem', background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#78350f', padding: '2px 7px', borderRadius: '8px', fontWeight: 700, marginLeft: '4px' }}>💰</span>}
-                    </h3>
-                    {!isExpanded && (
-                       <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                         {lesson.summary}
-                       </p>
-                    )}
-                  </div>
+            <article key={lesson.id} className={`break-inside-avoid relative rounded-2xl overflow-hidden bg-slate-900/70 backdrop-blur-md border transition-all duration-500 ${isExpanded ? 'border-primary shadow-[0_0_30px_rgba(207,188,255,0.2)]' : 'border-white/10'}`}>
+              <div className="relative w-full cursor-pointer overflow-hidden" style={{ height: isExpanded ? '120px' : (index % 2 === 0 ? '220px' : '180px') }} onClick={() => toggleLesson(lesson.id)}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradients[index % gradients.length]} flex items-center justify-center`}>
+                  <span className="text-6xl opacity-30">{lesson.icon}</span>
                 </div>
-                <div>
-                  {isExpanded ? <ChevronUp color="var(--color-text-muted)" /> : <ChevronDown color="var(--color-text-muted)" />}
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent"></div>
               </div>
 
-              {/* Contenido Desplegable */}
-              {isExpanded && (
-                <div className="animate-fade-in" style={{ padding: '0 1.2rem 1.5rem 1.2rem' }}>
-
-                  {/* Contenido Base */}
-                  <div style={{
-                    whiteSpace: 'pre-wrap',
-                    fontSize: '0.9rem',
-                    color: 'var(--color-text-main)',
-                    lineHeight: '1.7',
-                    background: 'rgba(255,255,255,0.4)',
-                    padding: '1rem',
-                    borderRadius: '12px'
-                  }}>
-                    {lesson.content}
-                  </div>
-
-                  {/* Botón Profundizar */}
-                  {lesson.expandedContent && (
-                    <button
-                      onClick={() => toggleDeepStudy(lesson.id)}
-                      style={{
-                        marginTop: '1rem',
-                        width: '100%',
-                        padding: '0.8rem',
-                        background: isDeepStudyOpen ? 'rgba(var(--color-primary-rgb, 244, 63, 94), 0.1)' : 'linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1))',
-                        border: '1px dashed var(--color-secondary)',
-                        borderRadius: '14px',
-                        color: 'var(--color-secondary)',
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        transition: 'all 0.3s ease'
-                      }}
-                    >
-                      {isDeepStudyOpen ? '📖 Cerrar Estudio Profundo' : '📘 Profundizar en este tema'}
-                    </button>
-                  )}
-
-                  {/* Contenido Profundo Expandido */}
-                  {isDeepStudyOpen && lesson.expandedContent && (
-                    <div className="animate-fade-in" style={{ marginTop: '1rem' }}>
-                      <div style={{
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(168,85,247,0.06))',
-                        border: '1px solid rgba(168,85,247,0.15)',
-                        borderRadius: '16px',
-                        padding: '1.2rem',
-                        position: 'relative',
-                        overflow: 'hidden'
-                      }}>
-                        {/* Badge */}
-                        <div style={{
-                          position: 'absolute', top: 0, right: 0,
-                          background: 'linear-gradient(135deg, var(--color-secondary), var(--color-primary))',
-                          color: '#fff',
-                          fontSize: '0.65rem',
-                          fontWeight: 800,
-                          padding: '4px 12px',
-                          borderRadius: '0 0 0 12px',
-                          letterSpacing: '0.5px',
-                          textTransform: 'uppercase'
-                        }}>
-                          Estudio Profundo
-                        </div>
-
-                        <div style={{
-                          whiteSpace: 'pre-wrap',
-                          fontSize: '0.88rem',
-                          color: 'var(--color-text-main)',
-                          lineHeight: '1.7',
-                          marginTop: '0.5rem'
-                        }}>
-                          {lesson.expandedContent}
-                        </div>
+              <div className="p-6">
+                <div className="cursor-pointer" onClick={() => toggleLesson(lesson.id)}>
+                  <h3 className="text-xl font-bold text-white mb-2">{lesson.title}</h3>
+                  {!isExpanded && <p className="text-slate-400 text-sm line-clamp-3">{lesson.summary}</p>}
+                </div>
+                {isExpanded && (
+                  <div className="animate-fade-in mt-4">
+                    <div className="text-slate-300 text-sm p-4 rounded-xl bg-white/5 border border-white/5">{lesson.content}</div>
+                    {lesson.expandedContent && (
+                      <button onClick={() => toggleDeepStudy(lesson.id)} className={`mt-4 w-full p-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 ${isDeepStudyOpen ? 'bg-primary/20 text-primary' : 'bg-slate-800 text-white'}`}>
+                        {isDeepStudyOpen ? 'Cerrar Estudio Profundo' : 'Profundizar en este tema'}
+                      </button>
+                    )}
+                    {isDeepStudyOpen && lesson.expandedContent && (
+                      <div className="animate-fade-in mt-3 bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-5 text-slate-300 text-sm">
+                        {lesson.expandedContent}
                       </div>
-                    </div>
-                  )}
-
-                  {/* Sección de Quiz */}
-                  {lesson.quiz && (
-                    <div style={{ marginTop: '1.2rem' }}>
-                      <div style={{
-                        background: isQuizPassed
-                          ? 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(52,211,153,0.08))'
-                          : 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.08))',
-                        border: isQuizPassed
-                          ? '1px solid rgba(16,185,129,0.2)'
-                          : '1px solid rgba(251,191,36,0.25)',
-                        borderRadius: '18px',
-                        padding: '1.2rem',
-                        position: 'relative'
-                      }}>
-                        {/* Header del Quiz */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.8rem' }}>
-                          {isQuizPassed ? (
-                            <CheckCircle size={20} color="#10b981" />
-                          ) : (
-                            <span style={{ fontSize: '1.2rem' }}>🧠</span>
-                          )}
-                          <h4 style={{ margin: 0, fontSize: '0.95rem', color: isQuizPassed ? '#10b981' : 'var(--color-text-highlight)', fontWeight: 700 }}>
-                            {isQuizPassed ? 'Prueba Superada ✅' : 'Cuestionario Rápido'}
-                          </h4>
-                          {!isQuizPassed && lesson.quiz.reward && (
-                            <span style={{
-                              marginLeft: 'auto',
-                              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-                              color: '#78350f',
-                              padding: '3px 10px',
-                              borderRadius: '10px',
-                              fontSize: '0.75rem',
-                              fontWeight: 800
-                            }}>
-                              +{lesson.quiz.reward} 💰
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Pregunta */}
-                        <p style={{
-                          fontSize: '0.9rem',
-                          color: 'var(--color-text-main)',
-                          fontWeight: 600,
-                          lineHeight: 1.5,
-                          marginBottom: '1rem'
-                        }}>
-                          {lesson.quiz.question}
-                        </p>
-
-                        {/* Opciones */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    )}
+                    {lesson.quiz && (
+                      <div className={`mt-5 p-5 rounded-xl border ${isQuizPassed ? 'bg-emerald-900/20 border-emerald-500/30' : 'bg-amber-900/20 border-amber-500/30'}`}>
+                        <h4 className={`text-sm font-bold mb-4 ${isQuizPassed ? 'text-emerald-400' : 'text-amber-400'}`}>{isQuizPassed ? 'Prueba Superada' : 'Cuestionario Rápido'}</h4>
+                        <p className="text-white text-sm mb-4">{lesson.quiz.question}</p>
+                        <div className="flex flex-col gap-2">
                           {lesson.quiz.options.map((option, idx) => {
                             const isSelected = currentSelected === idx;
-                            const isCorrectOption = idx === lesson.quiz.answerIndex;
-
-                            let optBg = 'var(--color-surface)';
-                            let optBorder = '1px solid var(--glass-border)';
-                            let optColor = 'var(--color-text-main)';
-
-                            if (isQuizPassed && isCorrectOption) {
-                              optBg = 'rgba(16,185,129,0.15)';
-                              optBorder = '2px solid #10b981';
-                              optColor = '#065f46';
-                            } else if (currentFeedback === 'correct' && isSelected) {
-                              optBg = 'rgba(16,185,129,0.15)';
-                              optBorder = '2px solid #10b981';
-                              optColor = '#065f46';
-                            } else if (currentFeedback === 'wrong' && isSelected) {
-                              optBg = 'rgba(239,68,68,0.12)';
-                              optBorder = '2px solid #ef4444';
-                              optColor = '#991b1b';
-                            }
-
                             return (
                               <button
                                 key={idx}
-                                disabled={isQuizPassed || currentFeedback === 'correct'}
+                                disabled={currentFeedback != null}
                                 onClick={() => handleQuizAnswer(lesson, idx)}
-                                style={{
-                                  width: '100%',
-                                  padding: '0.75rem 1rem',
-                                  background: optBg,
-                                  border: optBorder,
-                                  borderRadius: '12px',
-                                  cursor: isQuizPassed ? 'default' : 'pointer',
-                                  color: optColor,
-                                  fontSize: '0.85rem',
-                                  fontWeight: isSelected ? 700 : 500,
-                                  textAlign: 'left',
-                                  transition: 'all 0.2s ease',
-                                  opacity: isQuizPassed && !isCorrectOption ? 0.5 : 1,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '8px'
-                                }}
+                                className={`w-full text-left p-3 rounded-xl border transition-all duration-300 flex items-center gap-3 ${
+                                  isSelected 
+                                    ? (currentFeedback === 'correct' ? 'bg-emerald-900/40 border-emerald-500' : currentFeedback === 'wrong' ? 'bg-rose-900/40 border-rose-500' : 'bg-primary/20 border-primary') 
+                                    : 'bg-slate-800/50 border-white/5 hover:bg-slate-700/50 hover:border-white/20'
+                                }`}
                               >
-                                <span style={{
-                                  width: '22px', height: '22px', borderRadius: '50%',
-                                  background: isSelected && currentFeedback === 'correct' ? '#10b981'
-                                    : isSelected && currentFeedback === 'wrong' ? '#ef4444'
-                                    : isQuizPassed && isCorrectOption ? '#10b981'
-                                    : 'rgba(0,0,0,0.06)',
-                                  color: (isSelected && currentFeedback) || (isQuizPassed && isCorrectOption) ? '#fff' : 'var(--color-text-muted)',
-                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  fontSize: '0.7rem', fontWeight: 800, flexShrink: 0
-                                }}>
+                                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                  isSelected 
+                                    ? (currentFeedback === 'correct' ? 'bg-emerald-500 text-white' : currentFeedback === 'wrong' ? 'bg-rose-500 text-white' : 'bg-primary text-white') 
+                                    : 'bg-slate-700 text-slate-300'
+                                }`}>
                                   {String.fromCharCode(65 + idx)}
                                 </span>
-                                {option}
+                                <span className="text-white text-sm">{option}</span>
                               </button>
                             );
                           })}
@@ -841,12 +461,11 @@ export default function AcademyModule() {
                           </div>
                         )}
                       </div>
-                    </div>
-                  )}
-
-                </div>
-              )}
-            </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </article>
           );
         })}
       </div>

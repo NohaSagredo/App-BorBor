@@ -1,0 +1,71 @@
+﻿
+> borbor-app@0.0.0 lint
+> eslint .
+
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\BottomNavBar.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\DailyCheckInModal.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\ThemeProvider.jsx
+  354:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\TopAppBar.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\components\ZenAudio.jsx
+   79:13  error  'e' is defined but never used  no-unused-vars
+  140:56  error  'e' is defined but never used  no-unused-vars
+  191:13  error  'e' is defined but never used  no-unused-vars
+  253:55  error  'e' is defined but never used  no-unused-vars
+  254:63  error  'e' is defined but never used  no-unused-vars
+  285:50  error  'e' is defined but never used  no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\AcademyModule.jsx
+  402:69   error  'isQuizPassed' is not defined  no-undef
+  403:66   error  'isQuizPassed' is not defined  no-undef
+  403:123  error  'isQuizPassed' is not defined  no-undef
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\AdminDashboard.jsx
+  521:75  error  Unnecessary escape character: \"  no-useless-escape
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Auth.jsx
+   1:27  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  11:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\HombreHome.jsx
+    1:38  error    'useRef' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                       no-unused-vars
+    3:53  error    'where' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                        no-unused-vars
+    3:69  error    'arrayUnion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                   no-unused-vars
+   16:11  error    'themeId' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                             no-unused-vars
+   16:20  error    'setTheme' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                            no-unused-vars
+   16:30  error    'themes' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                              no-unused-vars
+   25:10  error    'todayLog' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                            no-unused-vars
+  278:6   warning  React Hook useEffect has a missing dependency: 'activePartnerId'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\KegelsModule.jsx
+   10:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   86:13  error  'e' is defined but never used                                                  no-unused-vars
+  154:33  error  'score' is defined but never used                                              no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\MujerHome.jsx
+   17:10  error    'partnerData' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                  no-unused-vars
+  327:6   warning  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Profile.jsx
+    2:20   error  'storage' is defined but never used. Allowed unused vars must match /^[A-Z_]/u         no-unused-vars
+    4:10   error  'ref' is defined but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+    4:15   error  'uploadBytes' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+    4:28   error  'getDownloadURL' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   10:10   error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u          no-unused-vars
+  201:101  error  'e' is defined but never used                                                          no-unused-vars
+  201:104  error  Empty block statement                                                                  no-empty
+  230:18   error  'normalParseError' is defined but never used                                           no-unused-vars
+
+C:\Users\Pacira\Desktop\Trabajos Bebeiro\App-BorBor\src\pages\Welcome.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Ô£û 38 problems (36 errors, 2 warnings)
+

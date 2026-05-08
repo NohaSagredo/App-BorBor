@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { db, auth } from '../firebase';
 import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
@@ -30,7 +30,7 @@ export default function KegelsModule() {
 
   // Control manual de audios
   const [isMusicManuallyPaused, setIsMusicManuallyPaused] = useState(false);
-  const [isGuidanceMuted, setIsGuidanceMuted] = useState(false);
+  const [isGuidanceMuted] = useState(false);
 
   const timerRef = useRef(null);
 
@@ -65,7 +65,7 @@ export default function KegelsModule() {
     return () => unsubscribe();
   }, [navigate]);
 
-  const playBeep = (type) => {
+  const playBeep = useCallback((type) => {
     if (isGuidanceMuted) return;
     try {
       const osc = new window.AudioContext().createOscillator();
@@ -82,8 +82,8 @@ export default function KegelsModule() {
       gainNode.gain.exponentialRampToValueAtTime(0.001, osc.context.currentTime + 0.5);
       osc.start();
       osc.stop(osc.context.currentTime + 0.5);
-    } catch(e) {}
-  };
+    } catch { /* silent — Web Audio API may fail on some browsers */ }
+  }, [isGuidanceMuted]);
 
   const startWorkout = () => {
     setIsWorkingOut(true);
@@ -146,7 +146,7 @@ export default function KegelsModule() {
     return () => {
         if(timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isWorkingOut, isPaused, phase, repsLeft, currentLevel, isGuidanceMuted]);
+  }, [isWorkingOut, isPaused, phase, repsLeft, currentLevel, isGuidanceMuted, playBeep]);
 
   // Emitir evento global para el GlobalBackground animado
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function KegelsModule() {
     }));
   }, [phase, currentLevel]);
 
-  const submitFeedback = async (score) => {
+  const submitFeedback = async () => {
      try {
        const today = new Date().toLocaleDateString('en-CA');
        await updateDoc(doc(db, 'users', userUid), {
@@ -198,7 +198,7 @@ export default function KegelsModule() {
   const progressRatio = nextLevel ? ((xp - currentLevel.xpRequired) / (nextLevel.xpRequired - currentLevel.xpRequired)) * 100 : 100;
 
   return (
-    <div style={{ padding: '1.5rem', maxWidth: '500px', margin: '0 auto', textAlign: 'center', position: 'relative', minHeight: '100vh', paddingBottom: '90px', overflow: 'hidden' }}>
+    <div className="app-wrapper responsive-container" style={{ textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
 
       <style>{`
         @keyframes kglOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(15px,-20px) scale(1.08)} }

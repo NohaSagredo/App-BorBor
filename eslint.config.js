@@ -23,7 +23,11 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Ignora: constantes UPPER_CASE, componentes PascalCase, y 'motion' (JSX namespace de framer-motion)
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]|^motion$' }],
+      // ThemeProvider exporta el hook useTheme además del componente — necesario por diseño
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
 ])
+

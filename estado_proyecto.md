@@ -6,8 +6,9 @@
 * Desarrollar una plataforma integral de bienestar sexual y fortalecimiento del piso pélvico orientada a la mujer, con diseño premium, gamificación (Reto de 30 Días), feedback visual motivador y currícula educativa.
 
 ## 📌 Foco de la Sesión Actual
-* **Finalizado:** Migración completa de marca (Holistica -> BorBor) y separación de infraestructura (Backend propio en Chile/Brasil).
-* **Finalizado:** Seguridad Nivel 2: Implementación de Control de Acceso Basado en Roles (RBAC) en Firestore y validaciones de ruta.
+* **Finalizado:** Centralización de la navegación (TopAppBar y BottomNavBar) y layout principal en `App.jsx`, eliminando duplicidades y conflictos de paddings en vistas hijas (`HombreHome`, `MujerHome`).
+* **Finalizado:** Sincronización dinámica de progreso (Niveles y XP) en la barra de navegación superior.
+* **Finalizado:** Limpieza profunda de dependencias y actualización a Tailwind CSS v4.
 
 ## 🗺️ Arquitectura y Decisiones Clave
 * **Stack Tecnológico:** React 19, Vite, Firebase (Auth + Firestore).
@@ -26,8 +27,9 @@
 * Transformación premium del `AdminDashboard.jsx` con paneles de insights mejorados y CRUD estilizado.
 * Migración de marca a BorBor y conexión a nuevo proyecto de Firebase.
 * Implementación de Seguridad Nivel 2 (Roles en DB) para el Dashboard administrativo.
-* Refinamiento de micro-animaciones (CSS y transiciones fluidas).
-* Mejora drástica de la estética del fondo animado (Glow y orbes fluidos en Canvas).
+* Centralización de elementos de navegación global en `App.jsx`.
+* Eliminación de importaciones de navbar redundantes en vistas hijas para asegurar un layout uniforme usando Glassmorphism y tailwindcss v4.
+* Cálculo dinámico del Nivel del usuario en el header superior usando la tabla real de Kegel Levels.
 
 ## 📋 Tareas Pendientes (To-Do)
 1. [ ] **[Alta Prioridad]:** Optimización de Rendimiento (Performance). Reducir el tamaño de los bundles y optimizar renders innecesarios en dashboards pesados.
@@ -45,4 +47,4 @@
 * **Resuelto:** Acceso cruzado a perfiles de género opuesto (Bug #4).
 
 ## 📂 Archivos Principales en Modificación
-* `AdminDashboard.jsx`, `HombreHome.jsx`, `MujerHome.jsx`, `KegelsModule.jsx`, `Welcome.jsx`.
+* `App.jsx`, `HombreHome.jsx`, `MujerHome.jsx`, `postcss.config.js`.

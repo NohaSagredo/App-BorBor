@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Check } from 'lucide-react';
 
 const STEPS = [
   {
@@ -67,67 +69,94 @@ export default function DailyCheckInModal({ onComplete, onClose }) {
   const progressPct = ((currentStep) / STEPS.length) * 100;
 
   return createPortal(
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(0, 0, 0, 0.4)',
-      backdropFilter: 'blur(15px)',
-      WebkitBackdropFilter: 'blur(15px)',
-      zIndex: 999999,
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '2rem'
-    }}>
-        {/* Barra de progreso superior */}
-        <div style={{ position: 'absolute', top: '2rem', left: '2rem', right: '2rem', height: '4px', background: 'rgba(0,0,0,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
-           <div style={{ width: `${progressPct}%`, height: '100%', background: 'var(--color-primary)', transition: 'width 0.4s ease' }} />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center px-6 bg-black/60 backdrop-blur-md font-body-md">
+      {/* Subtle particle effects */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-cyan-400 rounded-full blur-[1px] opacity-70"></div>
+        <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-indigo-400 rounded-full blur-[1px] opacity-50"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-cyan-300 rounded-full blur-[2px] opacity-40"></div>
+      </div>
+      
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        className="bg-glass-heavy w-full max-w-sm rounded-[2rem] p-8 flex flex-col items-center text-center relative border border-cyan-500/20 shadow-[0_0_50px_rgba(34,211,238,0.1)]"
+      >
+        {/* Progress Bar */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-surface-container-high rounded-t-[2rem] overflow-hidden">
+          <motion.div 
+            className="h-full bg-cyan-400 glow-cyan"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
 
-        {/* Cierre condicional o Botón Saltar */}
+        {/* Close / Skip button */}
         <button 
            onClick={onClose}
-           style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 'bold' }}
+           className="absolute top-4 right-4 text-outline-variant hover:text-white transition-colors"
+           title="Omitir hoy"
         >
-           Omitir hoy
+           <X size={24} />
         </button>
 
-        <div className="animate-fade-in" key={currentStep} style={{ width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '1.8rem', color: 'var(--color-text-highlight)', marginBottom: '0.4rem' }}>{stepData.title}</h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '2.5rem' }}>{stepData.subtitle}</p>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={currentStep}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="w-full flex flex-col items-center"
+          >
+            <h3 className="font-h1 text-h2 text-white mb-2 mt-4 leading-tight">{stepData.title}</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-8">{stepData.subtitle}</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', justifyItems: 'stretch' }}>
-                {stepData.options.map((opt) => (
-                    <button
-                        key={opt.value}
-                        onClick={() => handleSelect(opt.value)}
-                        className="hover-scale"
-                        style={{
-                            background: answers[stepData.id] === opt.value ? 'var(--color-primary)' : 'var(--glass-bg)',
-                            color: answers[stepData.id] === opt.value ? 'var(--btn-text-color)' : 'var(--color-text-main)',
-                            border: answers[stepData.id] === opt.value ? 'none' : '1px solid var(--glass-border)',
-                            padding: '1.5rem',
-                            borderRadius: '20px',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                            boxShadow: answers[stepData.id] === opt.value ? 'var(--btn-primary-shadow)' : '0 2px 10px rgba(0,0,0,0.02)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            width: '100%'
-                        }}
-                    >
-                        <span style={{ fontSize: '2rem' }}>{opt.icon}</span>
-                        <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{opt.label}</span>
-                    </button>
-                ))}
+            <div className="grid grid-cols-2 gap-4 w-full">
+                {stepData.options.map((opt) => {
+                    const isSelected = answers[stepData.id] === opt.value;
+                    return (
+                        <button
+                            key={opt.value}
+                            onClick={() => handleSelect(opt.value)}
+                            className={`relative group rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition-all ${
+                                isSelected 
+                                    ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]' 
+                                    : 'bg-surface-container hover:bg-surface-container-high border-transparent hover:border-outline-variant'
+                            } border cursor-pointer`}
+                        >
+                            <span className="text-4xl group-hover:scale-110 transition-transform">{opt.icon}</span>
+                            <span className={`font-label-caps tracking-widest uppercase mt-2 ${isSelected ? 'text-cyan-300 font-bold' : 'text-on-surface-variant'}`}>
+                                {opt.label}
+                            </span>
+                            {isSelected && (
+                                <motion.div 
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    className="absolute -top-2 -right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center glow-cyan"
+                                >
+                                    <Check size={14} className="text-white" strokeWidth={3} />
+                                </motion.div>
+                            )}
+                        </button>
+                    )
+                })}
             </div>
-        </div>
-        
-        {/* Paso atrás manual si se equivocó */}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Manual back step */}
         {currentStep > 0 && (
            <button 
              onClick={() => setCurrentStep(c => c - 1)}
-             style={{ background: 'none', border: 'none', padding: '1rem', marginTop: '2rem', color: 'var(--color-text-muted)', cursor: 'pointer', opacity: 0.7 }}
+             className="mt-6 text-outline font-label-caps tracking-widest uppercase hover:text-white transition-colors"
            >
              ← Volver a la pregunta anterior
            </button>
         )}
+      </motion.div>
     </div>,
     document.body
   );
