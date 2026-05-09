@@ -58,6 +58,8 @@ function AppContent() {
               setPartnerData(null);
             }
           }
+        }, (err) => {
+          console.error("Error global de usuario en App.jsx:", err);
         });
       } else {
         if (unsubscribeUser) unsubscribeUser();
