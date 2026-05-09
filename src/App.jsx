@@ -15,7 +15,7 @@ import TopAppBar from './components/TopAppBar';
 import BottomNavBar from './components/BottomNavBar';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { LEVELS } from './utils/kegelLevels';
 
@@ -27,32 +27,49 @@ function AppContent() {
   const [partnerData, setPartnerData] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribePartner = null;
+    let unsubscribeUser = null;
+
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setUserData(data);
-          
-          if (data.linkedPartnerId) {
-            const partnerRef = doc(db, 'users', data.linkedPartnerId);
-            const partnerSnap = await getDoc(partnerRef);
-            if (partnerSnap.exists()) {
-              setPartnerData(partnerSnap.data());
+        unsubscribeUser = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUserData(data);
+            
+            if (data.linkedPartnerId) {
+              const partnerRef = doc(db, 'users', data.linkedPartnerId);
+              if (unsubscribePartner) unsubscribePartner(); // clean previous listener
+              unsubscribePartner = onSnapshot(partnerRef, (partnerSnap) => {
+                if (partnerSnap.exists()) {
+                  setPartnerData(partnerSnap.data());
+                } else {
+                  setPartnerData(null);
+                }
+              });
             } else {
+              if (unsubscribePartner) {
+                unsubscribePartner();
+                unsubscribePartner = null;
+              }
               setPartnerData(null);
             }
-          } else {
-            setPartnerData(null);
           }
-        }
+        });
       } else {
+        if (unsubscribeUser) unsubscribeUser();
+        if (unsubscribePartner) unsubscribePartner();
         setUserData(null);
         setPartnerData(null);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      authUnsubscribe();
+      if (unsubscribeUser) unsubscribeUser();
+      if (unsubscribePartner) unsubscribePartner();
+    };
   }, []);
 
   const hideNavbars = ['/', '/auth', '/admin'].includes(location.pathname);

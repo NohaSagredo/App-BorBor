@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db, sendNotification } from '../firebase';
-import { doc, getDoc, updateDoc, collection, query, getDocs, increment } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, query, getDocs, increment, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -236,22 +236,21 @@ export default function HombreHome() {
 
   // Cargar perfil principal
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeUser = null;
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (!user) { setLoading(false); return; }
-      try {
-        const userSnap = await getDoc(doc(db, 'users', user.uid));
+      
+      unsubscribeUser = onSnapshot(doc(db, 'users', user.uid), (userSnap) => {
         if (userSnap.exists()) {
           const data = userSnap.data();
           setUserData(data);
 
-          // Guardar rol y validar acceso (Bug Fix #4)
           if (data.role === 'mujer') {
             navigate('/mujer');
             return;
           }
 
           let partnersArray = data.linkedPartners || [];
-          // Backward compatibility 
           if (partnersArray.length === 0 && data.linkedPartnerId) {
              partnersArray = [{ uid: data.linkedPartnerId, name: 'Pareja' }];
           }
@@ -262,43 +261,48 @@ export default function HombreHome() {
              setActivePartnerId(data.linkedPartnerId);
           } else if (partnersArray.length > 0) {
              setActivePartnerId(prev => prev || partnersArray[0].uid);
+          } else {
+             setActivePartnerId(null);
           }
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
+      }, (err) => {
+        console.error("Error al escuchar usuario:", err);
         setLoading(false);
-      }
+      });
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeUser) unsubscribeUser();
+    };
   }, [navigate]);
 
   // Cargar datos de la pareja activa cuando cambie
   useEffect(() => {
     if (!activePartnerId) return;
 
-    const fetchPartnerData = async () => {
-      try {
-        const partnerSnap = await getDoc(doc(db, 'users', activePartnerId));
-        if (partnerSnap.exists()) {
-          setPartnerData(partnerSnap.data());
-          
-          const logsQuery = query(collection(db, 'users', activePartnerId, 'dailyLogs'));
-          const logsRes = await getDocs(logsQuery);
-          
-          let fetchedLogs = {};
-          logsRes.forEach(doc => { fetchedLogs[doc.id] = doc.data(); });
-          setPartnerLogs(fetchedLogs);
-          
-          const todayStr = new Date().toLocaleDateString('en-CA');
-          setTodayLog(fetchedLogs[todayStr] || null);
-        }
-      } catch(e) {
-        console.error('Error al cargar compañera:', e);
+    const partnerUnsubscribe = onSnapshot(doc(db, 'users', activePartnerId), (partnerSnap) => {
+      if (partnerSnap.exists()) {
+        setPartnerData(partnerSnap.data());
+      } else {
+        setPartnerData(null);
       }
-    };
+    }, (err) => console.error("Error partner info:", err));
 
-    fetchPartnerData();
+    const logsQuery = query(collection(db, 'users', activePartnerId, 'dailyLogs'));
+    const logsUnsubscribe = onSnapshot(logsQuery, (logsRes) => {
+      let fetchedLogs = {};
+      logsRes.forEach(doc => { fetchedLogs[doc.id] = doc.data(); });
+      setPartnerLogs(fetchedLogs);
+      
+      const todayStr = new Date().toLocaleDateString('en-CA');
+      setTodayLog(fetchedLogs[todayStr] || null);
+    }, (err) => console.error("Error partner logs:", err));
+
+    return () => {
+      partnerUnsubscribe();
+      logsUnsubscribe();
+    };
   }, [activePartnerId]);
 
 
@@ -709,7 +713,13 @@ export default function HombreHome() {
               <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center' }}>
+            {!partnerData?.lastPeriodStart && Object.keys(partnerLogs).length === 0 ? (
+              <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem', opacity: 0.8 }}>⏳</div>
+                <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.4' }}>Esperando a que <strong>{partnerData.name}</strong> configure su ciclo menstrual o realice su primer registro.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center' }}>
               {generateCalendar().days.map((date, index) => {
                 if (!date) return <div key={`empty-${index}`} style={{ height: '35px' }} />;
                 
@@ -759,6 +769,7 @@ export default function HombreHome() {
                 );
               })}
             </div>
+            )}
 
             {/* Leyenda Visual de Seguridad Temática */}
             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>
