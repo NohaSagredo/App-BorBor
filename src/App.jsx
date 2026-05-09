@@ -47,6 +47,8 @@ function AppContent() {
                 } else {
                   setPartnerData(null);
                 }
+              }, (err) => {
+                console.error("Error en App.jsx al escuchar la pareja:", err);
               });
             } else {
               if (unsubscribePartner) {

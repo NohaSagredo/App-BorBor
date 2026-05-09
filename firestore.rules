@@ -9,8 +9,10 @@ service cloud.firestore {
     }
 
     function isLinkedPartner(userId) {
-      return request.auth != null &&
-             get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid;
+      return request.auth != null && (
+        get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedPartnerId == userId
+      );
     }
 
     match /users/{userId} {
