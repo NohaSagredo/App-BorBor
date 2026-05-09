@@ -26,7 +26,7 @@ export default function Profile() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        navigate('/auth');
+        navigate('/');
         return;
       }
       try {

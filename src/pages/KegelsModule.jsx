@@ -37,7 +37,7 @@ export default function KegelsModule() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        navigate('/auth');
+        navigate('/');
         return;
       }
       setUserUid(user.uid);
