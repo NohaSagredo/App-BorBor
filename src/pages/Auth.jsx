@@ -5,7 +5,10 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   sendPasswordResetEmail,
-  updateProfile 
+  updateProfile,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock, User, Sparkles } from 'lucide-react';
@@ -25,6 +28,7 @@ export default function Auth() {
   const [error, setError] = useState('');
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
@@ -58,6 +62,7 @@ export default function Auth() {
 
     try {
       if (isLogin) {
+        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
         const userCred = await signInWithEmailAndPassword(auth, email, password);
         let userRole = 'mujer';
         const userDoc = await getDoc(doc(db, 'users', userCred.user.uid));
@@ -76,7 +81,7 @@ export default function Auth() {
           email: email,
           role: role,
           createdAt: new Date().toISOString(),
-          linkCode: role === 'mujer' ? generatedLinkCode : '', 
+          linkCode: generatedLinkCode, 
           linkedPartnerId: ''
         });
         navigate(role === 'mujer' ? '/mujer' : '/hombre');
@@ -266,6 +271,26 @@ export default function Auth() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Remember Me — solo en login */}
+            {isLogin && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none', marginTop: '0.25rem' }}>
+                <div
+                  onClick={() => setRememberMe(r => !r)}
+                  style={{
+                    width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                    border: rememberMe ? '2px solid var(--color-primary, #f43f5e)' : '2px solid rgba(255,255,255,0.15)',
+                    background: rememberMe ? 'var(--color-primary, #f43f5e)' : 'rgba(255,255,255,0.04)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    boxShadow: rememberMe ? '0 0 10px rgba(244,63,94,0.3)' : 'none',
+                  }}
+                >
+                  {rememberMe && <span style={{ color: '#fff', fontSize: '0.7rem', fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                </div>
+                <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>Recordar mi sesión</span>
+              </label>
+            )}
 
             <button 
               type="submit" 

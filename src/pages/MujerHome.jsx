@@ -19,11 +19,8 @@ export default function MujerHome() {
   const [phase, setPhase] = useState('Ninguna registrada');
   const [isDiaryOpen, setIsDiaryOpen] = useState(false);
   const [isSymptomsInfoOpen, setIsSymptomsInfoOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('circle'); // 'grid' o 'circle'
   const [viewDate, setViewDate] = useState(new Date()); // Fecha para navegación del calendario en malla
-  const [lastInteraction, setLastInteraction] = useState(Date.now());
-  const [touchStartX, setTouchStartX] = useState(null);
-  const [touchEndX, setTouchEndX] = useState(null);
+  const calCarouselRef = React.useRef(null); // Ref para drag de mouse en el carrusel
   
   // Daily Checkin State
   const [showDailyCheckin, setShowDailyCheckin] = useState(false);
@@ -68,12 +65,7 @@ export default function MujerHome() {
        alert("Error al enviar el mimo.");
     }
   };
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setViewMode(prev => prev === 'circle' ? 'grid' : 'circle');
-    }, 12000); // Aumentado a 12 segundos
-    return () => clearInterval(timer);
-  }, [lastInteraction]); // Reiniciar el reloj al interactuar
+
 
   // Notificaciones
   const [notifications, setNotifications] = useState([]);
@@ -83,94 +75,92 @@ export default function MujerHome() {
   const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
   const [myLogs, setMyLogs] = useState({});
   const [symptoms, setSymptoms] = useState({
-    bleeding: null,
-    pain: null,
-    emotions: null,
-    energy: null,
-    skin: null,
-    libido: null,
-    intimacy: null,
+    bleeding:  null,
     flowColor: null,
-    fluid: null
+    fluid:     null,
+    symptoms:  [],   // multi-select: array de IDs
+    emotions:  null,
+    intimacy:  null,
   });
   const [symptomsSaved, setSymptomsSaved] = useState(false);
 
   const TRACKING_CATEGORIES = [
+    // ── 1. SANGRADO ──
     {
       id: 'bleeding',
-      title: 'Cantidad Flujo',
-      color: '#ef4444', // Rojo
+      title: 'Sangrado',
+      color: '#ef4444',
       options: [
-        { id: 'spotting', label: 'Manchado', icon: '🩸' },
-        { id: 'light', label: 'Ligero', icon: '💧' },
-        { id: 'medium', label: 'Medio', icon: '🩸' },
-        { id: 'heavy', label: 'Fuerte', icon: '🔴' }
+        { id: 'spotting', label: 'Manchado', icon: '🟤' },
+        { id: 'light',    label: 'Ligero',   icon: '💧' },
+        { id: 'medium',   label: 'Medio',    icon: '🩸' },
+        { id: 'heavy',    label: 'Abundante',icon: '🔴' }
       ]
     },
+    // ── 2. COLOR DE SANGRADO ──
     {
       id: 'flowColor',
-      title: 'Color del Flujo',
-      color: '#b91c1c', // Rojo oscuro
+      title: 'Color del Sangrado',
+      color: '#b91c1c',
       options: [
-        { id: 'pink', label: 'Rosado', icon: '🌸' },
-        { id: 'red', label: 'Rojo', icon: '🍎' },
-        { id: 'brown', label: 'Oscuro/Marrón', icon: '🍂' },
-        { id: 'clots', label: 'Coágulos', icon: '🍓' }
+        { id: 'pink',  label: 'Rosado',       icon: '🌸' },
+        { id: 'red',   label: 'Rojo',         icon: '🍎' },
+        { id: 'dark',  label: 'Oscuro/Marrón', icon: '🍂' }
       ]
     },
+    // ── 3. FLUJO VAGINAL ──
     {
       id: 'fluid',
-      title: 'Textura Cervical',
-      color: '#0ea5e9', // Celeste
+      title: 'Flujo Vaginal',
+      color: '#0ea5e9',
       options: [
-        { id: 'dry', label: 'Seco', icon: '🏜️' },
-        { id: 'sticky', label: 'Pegajoso', icon: '🍯' },
-        { id: 'creamy', label: 'Cremoso', icon: '🥛' },
-        { id: 'egg_white', label: 'Clara de Huevo', icon: '🥚' },
-        { id: 'watery', label: 'Acuoso', icon: '🌊' }
+        { id: 'dry',        label: 'Seco/Sin flujo',    icon: '🏖️' },
+        { id: 'sticky',     label: 'Pegajoso',         icon: '🍯' },
+        { id: 'creamy',     label: 'Espeso/Cremoso',   icon: '🥛' },
+        { id: 'watery',     label: 'Acuoso',           icon: '🌊' },
+        { id: 'egg_white',  label: 'Clara de Huevo',   icon: '🥚' },
+        { id: 'bad_odor',   label: 'Mal olor/Atípico', icon: '⚠️', alert: true },
+        { id: 'lumpy',      label: 'Grumoso 🚨',       icon: '🧫', alert: true }
       ]
     },
+    // ── 4. SÍNTOMAS (multi-select) ──
     {
-      id: 'pain',
-      title: 'Dolor',
-      color: '#8b5cf6', // Morado
+      id: 'symptoms',
+      title: 'Síntomas',
+      color: '#8b5cf6',
+      multiSelect: true,
       options: [
-        { id: 'none', label: 'Ninguno', icon: '✨' },
-        { id: 'cramps', label: 'Cólicos', icon: '⚡' },
-        { id: 'headache', label: 'Cabeza', icon: '🤕' },
-        { id: 'breasts', label: 'Senos', icon: '🍈' }
+        { id: 'cramps',        label: 'Cólicos',            icon: '⚡' },
+        { id: 'sore_breasts',  label: 'Dolor de senos',    icon: '🍈' },
+        { id: 'acne',          label: 'Acné',              icon: '🔴' },
+        { id: 'mood_swings',   label: 'Cambios de humor',  icon: '🌪️' },
+        { id: 'itching',       label: 'Picazón/Ardor',     icon: '🔥', alert: true },
+        { id: 'bloating',      label: 'Inflamación',       icon: '💖' }
       ]
     },
+    // ── 5. EMOCIONES ──
     {
       id: 'emotions',
       title: 'Emociones',
-      color: '#3b82f6', // Azul
+      color: '#3b82f6',
       options: [
-        { id: 'happy', label: 'Feliz', icon: '😊' },
-        { id: 'sensitive', label: 'Sensible', icon: '🥺' },
-        { id: 'sad', label: 'Triste', icon: '😢' },
-        { id: 'irritable', label: 'Irritable', icon: '😤' }
+        { id: 'happy',     label: 'Feliz',     icon: '😊' },
+        { id: 'sensitive', label: 'Sensible',  icon: '🥺' },
+        { id: 'sad',       label: 'Triste',    icon: '😢' },
+        { id: 'irritable', label: 'Irritable', icon: '😤' },
+        { id: 'calm',      label: 'Calmada',   icon: '😌' }
       ]
     },
-    {
-      id: 'energy',
-      title: 'Deseo / Energía',
-      color: '#f59e0b', // Naranja
-      options: [
-        { id: 'high_libido', label: 'Alta Líbido', icon: '🔥' },
-        { id: 'low_energy', label: 'Agotada', icon: '🔋' },
-        { id: 'normal', label: 'Normal', icon: '⭐' }
-      ]
-    },
+    // ── 6. INTIMIDAD ──
     {
       id: 'intimacy',
-      title: 'Intimidad sexual',
-      color: '#ec4899', // Pink
+      title: 'Intimidad',
+      color: '#ec4899',
       options: [
-        { id: 'protected', label: 'Protección', icon: '🛡️' },
-        { id: 'unprotected_out', label: 'Afuera', icon: '💦' },
-        { id: 'unprotected_in', label: 'Adentro', icon: '🎯' },
-        { id: 'masturbation', label: 'A solas', icon: '🖐️' }
+        { id: 'protected',       label: 'Protección',  icon: '🛡️' },
+        { id: 'unprotected_out', label: 'Afuera',      icon: '💦' },
+        { id: 'unprotected_in',  label: 'Adentro',     icon: '🎯' },
+        { id: 'masturbation',    label: 'A solas',     icon: '🖐️' }
       ]
     }
   ];
@@ -230,12 +220,18 @@ export default function MujerHome() {
     return { currentStart, cycleLength };
   };
 
-  // Helper para manejar selección estilo "radio" (solo 1 por categoría)
+  // Helper de selección: radio para categorías normales, toggle de array para multi-select
   const toggleSymptom = (categoryId, optionId) => {
-    setSymptoms(prev => ({
-      ...prev,
-      [categoryId]: prev[categoryId] === optionId ? null : optionId
-    }));
+    const cat = TRACKING_CATEGORIES.find(c => c.id === categoryId);
+    if (cat?.multiSelect) {
+      setSymptoms(prev => {
+        const current = prev[categoryId] || [];
+        const exists = current.includes(optionId);
+        return { ...prev, [categoryId]: exists ? current.filter(id => id !== optionId) : [...current, optionId] };
+      });
+    } else {
+      setSymptoms(prev => ({ ...prev, [categoryId]: prev[categoryId] === optionId ? null : optionId }));
+    }
   };
 
   useEffect(() => {
@@ -607,23 +603,20 @@ export default function MujerHome() {
     if (!date) return;
     const dStr = date.toLocaleDateString('en-CA');
     setSelectedDate(dStr);
-    setIsDiaryOpen(true); // Abrir el diario automáticamente
+    setIsDiaryOpen(true);
     
     if (myLogs[dStr]) {
+      const log = myLogs[dStr];
       setSymptoms({
-        bleeding: myLogs[dStr].bleeding || null,
-        pain: myLogs[dStr].pain || null,
-        emotions: myLogs[dStr].emotions || myLogs[dStr].emotion || null, // compatible con mapeo de Clover
-        energy: myLogs[dStr].energy || null,
-        skin: myLogs[dStr].skin || null,
-        libido: myLogs[dStr].libido || null,
-        intimacy: myLogs[dStr].intimacy || null,
-        flowColor: myLogs[dStr].flowColor || null,
-        fluid: myLogs[dStr].fluid || null
+        bleeding:  log.bleeding  || null,
+        flowColor: log.flowColor || null,
+        fluid:     log.fluid     || null,
+        symptoms:  Array.isArray(log.symptoms) ? log.symptoms : [],
+        emotions:  log.emotions  || log.emotion || null,
+        intimacy:  log.intimacy  || null,
       });
     } else {
-      // Limpiar formulario si el dia no tiene nada
-      setSymptoms({ bleeding: null, pain: null, emotions: null, energy: null, skin: null, libido: null, intimacy: null, flowColor: null, fluid: null });
+      setSymptoms({ bleeding: null, flowColor: null, fluid: null, symptoms: [], emotions: null, intimacy: null });
     }
   };
 
@@ -741,21 +734,6 @@ export default function MujerHome() {
               )}
             </button>
             <button
-              onClick={() => {
-                const themeIds = Object.keys(themes);
-                const nextIndex = (themeIds.indexOf(themeId) + 1) % themeIds.length;
-                setTheme(themeIds[nextIndex]);
-              }}
-              style={{
-                width: 38, height: 38, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1rem', cursor: 'pointer'
-              }}
-              aria-label="Cambiar Tema"
-            >🎨</button>
-            <button
               onClick={() => navigate('/perfil')}
               style={{
                 width: 38, height: 38, borderRadius: '50%',
@@ -821,155 +799,162 @@ export default function MujerHome() {
               <h3 style={{ margin: 0, color: 'var(--btn-text-color)', fontSize: '1.05rem', fontWeight: 700, position: 'relative', zIndex: 2 }}>Entrenamiento Pélvico</h3>
             </div>
 
-          {/* Main Phase Banner */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0.5rem' }}>
-             <h2 style={{ fontSize: '1.4rem', color: 'var(--color-text-highlight)', fontWeight: 800 }}>{phase.split(' ')[0]}</h2>
-             {/* Card dots indicator */}
-             <div style={{ display: 'flex', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: viewMode === 'circle' ? 'var(--color-primary)' : '#cbd5e1', transition: 'background 0.3s' }}></span>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: viewMode === 'grid' ? 'var(--color-primary)' : '#cbd5e1', transition: 'background 0.3s' }}></span>
-             </div>
+          {/* ── CARRUSEL DE CALENDARIO (CSS scroll-snap, sin estado de touch) ── */}
+          <div style={{ marginBottom: '0.5rem', padding: '0 0.2rem' }}>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--color-text-highlight)', fontWeight: 800, marginBottom: 0 }}>{phase.split(' ')[0]}</h2>
+            <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Desliza para cambiar vista</span>
           </div>
 
-          <div 
-             className="glass-panel" 
-             style={{ padding: '1.5rem', overflow: 'hidden', touchAction: 'pan-y', userSelect: 'none' }}
-             onClickCapture={() => setLastInteraction(Date.now())}
-             onPointerDownCapture={(e) => {
-               setTouchEndX(null);
-               setTouchStartX(e.clientX);
-               setLastInteraction(Date.now());
-             }}
-             onPointerMoveCapture={(e) => {
-               if (touchStartX !== null) {
-                 setTouchEndX(e.clientX);
-               }
-             }}
-             onPointerUpCapture={() => {
-               if (!touchStartX || !touchEndX) {
-                 setTouchStartX(null);
-                 setTouchEndX(null);
-                 return;
-               }
-               const distance = touchStartX - touchEndX;
-               const minSwipeDistance = 50;
-               if (distance > minSwipeDistance || distance < -minSwipeDistance) {
-                  setViewMode(prev => prev === 'circle' ? 'grid' : 'circle');
-                  setLastInteraction(Date.now());
-               }
-               setTouchStartX(null);
-               setTouchEndX(null);
-             }}
-             onPointerCancelCapture={() => {
-               setTouchStartX(null);
-               setTouchEndX(null);
-             }}
-          >
-            
-            <div style={{ marginBottom: '1rem' }}>
-              <h3 style={{ color: 'var(--color-text-main)', marginBottom: '0.2rem' }}>Calendario de Ciclo</h3>
-              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'capitalize', fontWeight: 600 }}>
-                {generateCalendar().monthName} {generateCalendar().year}
-              </span>
-            </div>
-            
-            {/* Conditional Rendering between Views con Animación */}
-            <div key={viewMode} className="animate-fade-in" style={{ animationDuration: '0.8s' }}>
-              {viewMode === 'circle' ? (
-              <CircularCycleView 
-                cycleLength={getCycleStats(myLogs).cycleLength} 
-                dayOfCycle={(() => {
-                  const stats = getCycleStats(myLogs);
-                  const activeStart = stats.currentStart || lastPeriodStart;
-                  if (!activeStart) return 1;
-                  const diffTime = new Date().setHours(0,0,0,0) - new Date(activeStart).setHours(0,0,0,0);
-                  const cycleDayOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                  return (cycleDayOffset % (stats.cycleLength || 28)) + 1;
-                })()} 
-              />
-            ) : (
-              <div>
-                {/* Navegación del Mes */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0.5rem 0 1rem 0' }}>
-                  <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} style={{ background: 'var(--color-bg)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', fontSize: '1rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&larr;</button>
-                  <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--color-text-main)' }}>
+          <div className="glass-panel" style={{ padding: 0, overflow: 'hidden' }}>
+            {/* Contenedor scroll-snap: mueve horizontalmente entre las dos vistas */}
+            <div
+              ref={calCarouselRef}
+              style={{
+                display: 'flex',
+                overflowX: 'auto',
+                scrollSnapType: 'x mandatory',
+                scrollBehavior: 'smooth',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                cursor: 'grab',
+                userSelect: 'none',
+              }}
+              className="cal-carousel no-scrollbar"
+              onMouseDown={(e) => {
+                const el = calCarouselRef.current;
+                if (!el) return;
+                el.dataset.dragging = 'true';
+                el.dataset.startX = e.pageX - el.offsetLeft;
+                el.dataset.scrollLeft = el.scrollLeft;
+                el.style.cursor = 'grabbing';
+                el.style.scrollBehavior = 'auto'; // desactiva smooth durante drag
+              }}
+              onMouseMove={(e) => {
+                const el = calCarouselRef.current;
+                if (!el || el.dataset.dragging !== 'true') return;
+                e.preventDefault();
+                const x = e.pageX - el.offsetLeft;
+                const walk = (x - Number(el.dataset.startX)) * 1.5;
+                el.scrollLeft = Number(el.dataset.scrollLeft) - walk;
+              }}
+              onMouseUp={() => {
+                const el = calCarouselRef.current;
+                if (!el) return;
+                el.dataset.dragging = 'false';
+                el.style.cursor = 'grab';
+                el.style.scrollBehavior = 'smooth'; // reactiva smooth para el snap
+              }}
+              onMouseLeave={() => {
+                const el = calCarouselRef.current;
+                if (!el) return;
+                el.dataset.dragging = 'false';
+                el.style.cursor = 'grab';
+                el.style.scrollBehavior = 'smooth';
+              }}
+            >
+              {/* ── SLIDE 1: Vista Circular ── */}
+              <div style={{
+                flex: '0 0 100%',
+                scrollSnapAlign: 'start',
+                padding: '1.2rem 1rem',
+                boxSizing: 'border-box',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <h3 style={{ color: 'var(--color-text-main)', margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Vista Circular</h3>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 600, background: 'rgba(255,255,255,0.06)', padding: '3px 8px', borderRadius: '20px' }}>1 / 2 →</span>
+                </div>
+                <CircularCycleView
+                  cycleLength={getCycleStats(myLogs).cycleLength}
+                  dayOfCycle={(() => {
+                    const stats = getCycleStats(myLogs);
+                    const activeStart = stats.currentStart || lastPeriodStart;
+                    if (!activeStart) return 1;
+                    const diffTime = new Date().setHours(0,0,0,0) - new Date(activeStart).setHours(0,0,0,0);
+                    const cycleDayOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    return (cycleDayOffset % (stats.cycleLength || 28)) + 1;
+                  })()}
+                />
+              </div>
+
+              {/* ── SLIDE 2: Vista Grilla ── */}
+              <div style={{
+                flex: '0 0 100%',
+                scrollSnapAlign: 'start',
+                padding: '1.2rem 1rem',
+                boxSizing: 'border-box',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+                  <h3 style={{ color: 'var(--color-text-main)', margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>
                     {generateCalendar().monthName} {generateCalendar().year}
                   </h3>
-                  <button onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))} style={{ background: 'var(--color-bg)', border: 'none', width: '30px', height: '30px', borderRadius: '50%', fontSize: '1rem', cursor: 'pointer', color: 'var(--color-text-muted)' }}>&rarr;</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 600, background: 'rgba(255,255,255,0.06)', padding: '3px 8px', borderRadius: '20px' }}>← 2 / 2</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)); }}
+                      style={{ background: 'rgba(255,255,255,0.08)', border: 'none', width: 28, height: 28, borderRadius: '50%', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >‹</button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)); }}
+                      style={{ background: 'rgba(255,255,255,0.08)', border: 'none', width: 28, height: 28, borderRadius: '50%', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >›</button>
+                  </div>
                 </div>
 
-                {/* Grilla Semanal */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>
-                  <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+                {/* Días de semana */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '0.4rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 700 }}>
+                  {['L','M','X','J','V','S','D'].map(d => <div key={d}>{d}</div>)}
                 </div>
 
-                {/* Días del Calendario */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center' }}>
+                {/* Días del calendario */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
                   {generateCalendar().days.map((date, index) => {
-                    if (!date) return <div key={`empty-${index}`} style={{ height: '40px' }} />;
-                    
+                    if (!date) return <div key={`empty-${index}`} style={{ height: '36px' }} />;
                     const styles = getPhaseStyles(date);
                     const dStr = date.toLocaleDateString('en-CA');
-                    
-                    const hasLogs = myLogs[dStr] ? true : false;
+                    const hasLogs = !!myLogs[dStr];
                     const logFluid = myLogs[dStr]?.fluid;
-                    
-                    // Fondo de fluído dinámico según tema
-                    const fluidBg = (logFluid === 'egg_white' || logFluid === 'watery') 
-                                      ? 'linear-gradient(135deg, var(--color-safe), transparent)' 
-                                      : styles.bg;
-
+                    const fluidBg = (logFluid === 'egg_white' || logFluid === 'watery')
+                      ? 'linear-gradient(135deg, var(--color-safe), transparent)'
+                      : styles.bg;
                     const isSelected = selectedDate === dStr;
-                    // Elegant selected state
-                    const appliedBg = isSelected ? 'var(--color-primary)' : fluidBg;
-                    const appliedColor = isSelected ? '#ffffff' : styles.color;
-                    const fontWeight = isSelected || styles.isToday ? '700' : '500';
-
                     return (
-                      <div 
+                      <div
                         key={date.toISOString()}
                         onClick={() => handleDateClick(date)}
                         style={{
-                          width: '40px',
-                          height: '40px',
-                          margin: '0 auto',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
+                          width: '36px', height: '36px', margin: '0 auto',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                           borderRadius: '50%',
-                          background: appliedBg,
-                          color: appliedColor,
-                          fontWeight: fontWeight,
-                          fontSize: '0.95rem',
-                          position: 'relative',
-                          cursor: 'pointer',
+                          background: isSelected ? 'var(--color-primary)' : fluidBg,
+                          color: isSelected ? '#fff' : styles.color,
+                          fontWeight: (isSelected || styles.isToday) ? 700 : 500,
+                          fontSize: '0.88rem', position: 'relative', cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          boxShadow: isSelected ? '0 4px 12px rgba(244, 114, 182, 0.4)' : 'none',
+                          boxShadow: isSelected ? '0 4px 12px rgba(244,114,182,0.4)' : 'none',
                           border: isSelected ? 'none' : (styles.border || '1px solid transparent'),
-                          opacity: styles.isPrediction && !styles.isToday ? 0.7 : 1
+                          opacity: styles.isPrediction && !styles.isToday ? 0.65 : 1,
                         }}
                       >
                         {date.getDate()}
-                        {/* Modern subtle indicators underneath */}
-                        <div style={{ position: 'absolute', bottom: '4px', display: 'flex', gap: '3px' }}>
-                          {styles.isToday && !isSelected && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--color-text-main)' }}></div>}
-                          {hasLogs && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: isSelected ? '#fff' : 'var(--color-primary)' }}></div>}
-                          {styles.current && <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#ef4444' }}></div>}
+                        <div style={{ position: 'absolute', bottom: '3px', display: 'flex', gap: '2px' }}>
+                          {styles.isToday && !isSelected && <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--color-text-main)' }} />}
+                          {hasLogs && <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: isSelected ? '#fff' : 'var(--color-primary)' }} />}
+                          {styles.current && <div style={{ width: '3px', height: '3px', borderRadius: '50%', background: '#ef4444' }} />}
                         </div>
-                        {styles.dot && <span style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '14px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{styles.dot}</span>}
+                        {styles.dot && <span style={{ position: 'absolute', top: '-7px', right: '-7px', fontSize: '11px' }}>{styles.dot}</span>}
                       </div>
                     );
                   })}
                 </div>
-                
-                {/* Leyenda Visual Modificada Minimalista */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: '600' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#be185d' }}></div> Registrado</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', border: '1px dashed #be185d' }}></div> Proyección</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-text-muted)' }}></div> Seguro</div>
+
+                {/* Leyenda */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginTop: '1.2rem', fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#be185d' }} /> Registrado</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '7px', height: '7px', borderRadius: '50%', border: '1px dashed #be185d' }} /> Proyección</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}><div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--color-text-muted)' }} /> Seguro</div>
                 </div>
               </div>
-            )}
             </div>
           </div>
           </div>
@@ -1088,23 +1073,28 @@ export default function MujerHome() {
                   
                   {TRACKING_CATEGORIES.map((category) => (
                     <div key={category.id}>
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--color-text-main)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--color-text-main)', marginBottom: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {category.title}
+                        {category.multiSelect && <span style={{ fontSize: '0.65rem', background: 'rgba(139,92,246,0.15)', color: '#8b5cf6', borderRadius: '6px', padding: '1px 6px', fontWeight: 700, letterSpacing: 0 }}>Múltiple</span>}
                       </h4>
                       
-                      {/* Contenedor escrolleable horizontal */}
+                      {/* Contenedor scrolleable horizontal */}
                       <div style={{ 
                         display: 'flex', 
                         gap: '12px', 
                         overflowX: 'auto', 
                         paddingBottom: '8px',
-                        scrollbarWidth: 'none', /* Firefox */
-                        msOverflowStyle: 'none'  /* Internet Explorer 10+ */
+                        scrollbarWidth: 'none',
+                        msOverflowStyle: 'none'
                       }}
                       className="hide-scrollbar"
                       >
                         {category.options.map((opt) => {
-                          const isSelected = symptoms[category.id] === opt.id;
+                          const isSelected = category.multiSelect
+                            ? (symptoms[category.id] || []).includes(opt.id)
+                            : symptoms[category.id] === opt.id;
+                          const alertColor = '#ef4444';
+                          const activeColor = opt.alert ? alertColor : category.color;
                           return (
                             <div 
                               key={opt.id}
@@ -1113,33 +1103,38 @@ export default function MujerHome() {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                minWidth: '70px',
-                                cursor: 'pointer'
+                                minWidth: '72px',
+                                cursor: 'pointer',
+                                position: 'relative'
                               }}
                             >
                               <div style={{
                                 width: '56px',
                                 height: '56px',
                                 borderRadius: '50%',
-                                background: isSelected ? category.color : '#f3f4f6',
+                                background: isSelected ? activeColor : (opt.alert ? 'rgba(239,68,68,0.08)' : 'var(--color-surface)'),
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '1.5rem',
                                 marginBottom: '6px',
                                 transition: 'all 0.2s',
-                                boxShadow: isSelected ? `0 4px 10px ${category.color}40` : 'none',
-                                transform: isSelected ? 'scale(1.05)' : 'scale(1)',
-                                border: isSelected ? 'none' : '1px solid #e5e7eb'
+                                boxShadow: isSelected ? `0 4px 12px ${activeColor}50` : 'none',
+                                transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                                border: isSelected ? 'none' : (opt.alert ? `1.5px dashed ${alertColor}60` : '1px solid var(--glass-border)')
                               }}>
-                                {/* Filtro sutil para el icono si está inactivo */}
-                                <span style={{ opacity: isSelected ? 1 : 0.7 }}>{opt.icon}</span>
+                                <span style={{ opacity: isSelected ? 1 : 0.75 }}>{opt.icon}</span>
                               </div>
+                              {/* Badge de alerta */}
+                              {opt.alert && !isSelected && (
+                                <span style={{ position: 'absolute', top: -3, right: 6, background: alertColor, color: '#fff', borderRadius: '50%', width: 14, height: 14, fontSize: '0.55rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>!</span>
+                              )}
                               <span style={{ 
-                                fontSize: '0.75rem', 
-                                color: isSelected ? '#1f2937' : '#9ca3af',
-                                fontWeight: isSelected ? 'bold' : 'normal',
-                                textAlign: 'center'
+                                fontSize: '0.72rem', 
+                                color: isSelected ? (opt.alert ? alertColor : 'var(--color-text-main)') : 'var(--color-text-muted)',
+                                fontWeight: isSelected ? 700 : 500,
+                                textAlign: 'center',
+                                lineHeight: 1.2
                               }}>
                                 {opt.label}
                               </span>
@@ -1147,6 +1142,17 @@ export default function MujerHome() {
                           );
                         })}
                       </div>
+
+                      {/* Mensaje de advertencia si hay alerta seleccionada */}
+                      {category.options.some(opt => opt.alert && (
+                        category.multiSelect
+                          ? (symptoms[category.id] || []).includes(opt.id)
+                          : symptoms[category.id] === opt.id
+                      )) && (
+                        <div style={{ marginTop: '0.5rem', padding: '0.6rem 0.9rem', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '10px', fontSize: '0.78rem', color: '#ef4444', fontWeight: 600 }}>
+                          ⚠️ Considera consultar con tu médico si esto persiste más de 2-3 días.
+                        </div>
+                      )}
                     </div>
                   ))}
 

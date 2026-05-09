@@ -5,38 +5,38 @@ import { X, Check } from 'lucide-react';
 
 const STEPS = [
   {
-    id: 'emotions',
-    title: '¿Cómo te sientes hoy?',
-    subtitle: 'Elige tu estado de ánimo principal',
-    options: [
-      { value: 'happy', label: 'Feliz', icon: '😊' },
-      { value: 'sensitive', label: 'Sensible', icon: '🥺' },
-      { value: 'sad', label: 'Triste', icon: '😢' },
-      { value: 'irritable', label: 'Irritable', icon: '😤' },
-      { value: 'calm', label: 'Calmada', icon: '😌' } // Fallback
-    ]
-  },
-  {
-    id: 'pain',
-    title: '¿Sientes alguna molestia física?',
-    subtitle: 'Nos ayuda a proyectar alertas premenstruales',
-    options: [
-      { value: 'none', label: 'Sin dolor', icon: '✨' },
-      { value: 'cramps', label: 'Cólicos', icon: '⚡' },
-      { value: 'headache', label: 'Cabeza', icon: '🤕' },
-      { value: 'breasts', label: 'Senos', icon: '🍈' }
-    ]
-  },
-  {
     id: 'bleeding',
     title: '¿Tuviste sangrado hoy?',
     subtitle: 'Vital para calibrar el algoritmo de tu ciclo',
     options: [
-      { value: 'none', label: 'Nada', icon: '💧' },
-      { value: 'spotting', label: 'Manchado', icon: '🩸' },
-      { value: 'light', label: 'Ligero', icon: '🩸' },
-      { value: 'medium', label: 'Medio', icon: '🔴' },
-      { value: 'heavy', label: 'Fuerte', icon: '⭕' }
+      { value: 'none',     label: 'Nada',      icon: '💧' },
+      { value: 'spotting', label: 'Manchado',   icon: '🟤' },
+      { value: 'light',    label: 'Ligero',     icon: '🩸' },
+      { value: 'medium',   label: 'Medio',      icon: '🩸' },
+      { value: 'heavy',    label: 'Abundante',  icon: '🔴' }
+    ]
+  },
+  {
+    id: 'flowColor',
+    title: '¿De qué color fue el sangrado?',
+    subtitle: 'Salta si no tuviste sangrado hoy',
+    skipIfPrev: { field: 'bleeding', value: 'none' }, // se salta si bleeding === none
+    options: [
+      { value: 'pink',  label: 'Rosado',        icon: '🌸' },
+      { value: 'red',   label: 'Rojo',          icon: '🍎' },
+      { value: 'dark',  label: 'Oscuro/Marrón', icon: '🍂' }
+    ]
+  },
+  {
+    id: 'emotions',
+    title: '¿Cómo te sientes hoy?',
+    subtitle: 'Elige tu estado de ánimo principal',
+    options: [
+      { value: 'happy',     label: 'Feliz',     icon: '😊' },
+      { value: 'sensitive', label: 'Sensible',  icon: '🥺' },
+      { value: 'sad',       label: 'Triste',    icon: '😢' },
+      { value: 'irritable', label: 'Irritable', icon: '😤' },
+      { value: 'calm',      label: 'Calmada',   icon: '😌' }
     ]
   }
 ];
@@ -44,9 +44,9 @@ const STEPS = [
 export default function DailyCheckInModal({ onComplete, onClose }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState({
-      emotions: null,
-      pain: null,
-      bleeding: null
+    bleeding:  null,
+    flowColor: null,
+    emotions:  null,
   });
 
   const stepData = STEPS[currentStep];
@@ -55,14 +55,24 @@ export default function DailyCheckInModal({ onComplete, onClose }) {
     const newAnswers = { ...answers, [stepData.id]: value };
     setAnswers(newAnswers);
 
-    // Timeout para auto-avanzar después de seleccionar (Sensación fluida)
     setTimeout(() => {
-        if (currentStep < STEPS.length - 1) {
-            setCurrentStep(c => c + 1);
+      let nextStep = currentStep + 1;
+
+      // Si el siguiente paso tiene skipIfPrev, chequeamos si saltar
+      while (nextStep < STEPS.length) {
+        const ns = STEPS[nextStep];
+        if (ns.skipIfPrev && newAnswers[ns.skipIfPrev.field] === ns.skipIfPrev.value) {
+          nextStep++;
         } else {
-            // Completado
-            onComplete(newAnswers);
+          break;
         }
+      }
+
+      if (nextStep < STEPS.length) {
+        setCurrentStep(nextStep);
+      } else {
+        onComplete(newAnswers);
+      }
     }, 400);
   };
 

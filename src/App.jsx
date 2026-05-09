@@ -24,6 +24,7 @@ function AppContent() {
   const isWide = ['/academia', '/admin', '/insights'].includes(location.pathname);
   
   const [userData, setUserData] = useState(null);
+  const [partnerData, setPartnerData] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -31,10 +32,24 @@ function AppContent() {
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setUserData(docSnap.data());
+          const data = docSnap.data();
+          setUserData(data);
+          
+          if (data.linkedPartnerId) {
+            const partnerRef = doc(db, 'users', data.linkedPartnerId);
+            const partnerSnap = await getDoc(partnerRef);
+            if (partnerSnap.exists()) {
+              setPartnerData(partnerSnap.data());
+            } else {
+              setPartnerData(null);
+            }
+          } else {
+            setPartnerData(null);
+          }
         }
       } else {
         setUserData(null);
+        setPartnerData(null);
       }
     });
     return () => unsubscribe();
@@ -60,7 +75,7 @@ function AppContent() {
       paddingBottom: hideNavbars ? '0px' : '80px'
     }}>
       <GlobalBackground />
-      {!hideNavbars && <TopAppBar avatarUrl={userData?.photoURL} coins={userData?.kegelCoins || 0} level={currentLevel} homeRoute={homeRoute} />}
+      {!hideNavbars && <TopAppBar avatarUrl={userData?.photoURL} partnerAvatarUrl={partnerData?.photoURL} coins={userData?.kegelCoins || 0} level={currentLevel} homeRoute={homeRoute} />}
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="/auth" element={<Auth />} />

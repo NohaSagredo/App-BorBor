@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from './ThemeProvider';
 
-export default function TopAppBar({ avatarUrl, level = 1, coins = 0, homeRoute = '/mujer' }) {
+export default function TopAppBar({ avatarUrl, partnerAvatarUrl, level = 1, coins = 0, homeRoute = '/mujer' }) {
   const navigate = useNavigate();
   const { themeId, setTheme, themes } = useTheme();
 
@@ -37,53 +37,82 @@ export default function TopAppBar({ avatarUrl, level = 1, coins = 0, homeRoute =
         boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
       }}
     >
-      {/* Avatar (clickeable → Perfil) + Level */}
+      {/* Avatar propio + (opcional) Avatar pareja */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <button
-          onClick={() => navigate('/perfil')}
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            padding: '2px',
-            background: 'linear-gradient(135deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
-            flexShrink: 0,
-            overflow: 'hidden',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.1)';
-            e.currentTarget.style.boxShadow = '0 0 12px rgba(244,63,94,0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          aria-label="Ir a Perfil"
-        >
-          <div style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            background: '#1e1b2e',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Avatar"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
-            ) : (
-              <span style={{ fontSize: '1.2rem' }}>👤</span>
-            )}
-          </div>
-        </button>
+        {/* Grupo de avatares — propio + pareja */}
+        <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+          {/* Avatar propio */}
+          <button
+            onClick={() => navigate('/perfil')}
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              padding: '2px',
+              background: 'linear-gradient(135deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
+              flexShrink: 0,
+              overflow: 'hidden',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              zIndex: 2,
+              position: 'relative',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.boxShadow = '0 0 12px rgba(244,63,94,0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            aria-label="Ir a Perfil"
+          >
+            <div style={{
+              width: '100%', height: '100%', borderRadius: '50%',
+              overflow: 'hidden', background: '#1e1b2e',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <span style={{ fontSize: '1.2rem' }}>👤</span>
+              )}
+            </div>
+          </button>
+
+          {/* Avatar pareja (solo si está vinculado) */}
+          {partnerAvatarUrl && (
+            <div style={{ position: 'relative', marginLeft: '-10px', zIndex: 1 }}>
+              {/* Anillo de vinculación */}
+              <div style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                padding: '2px',
+                background: 'linear-gradient(135deg, #38bdf8, #818cf8)',
+                flexShrink: 0, overflow: 'hidden',
+                boxShadow: '0 0 8px rgba(56,189,248,0.4)',
+              }}>
+                <div style={{
+                  width: '100%', height: '100%', borderRadius: '50%',
+                  overflow: 'hidden', background: '#1e1b2e',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <img src={partnerAvatarUrl} alt="Pareja" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+              </div>
+              {/* Icono de vinculación */}
+              <span style={{
+                position: 'absolute', bottom: -3, right: -3,
+                background: 'linear-gradient(135deg, #f43f5e, #c084fc)',
+                borderRadius: '50%', width: 14, height: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.5rem', border: '1.5px solid rgba(8,6,14,0.9)',
+                zIndex: 3,
+              }}>💞</span>
+            </div>
+          )}
+        </div>
+
         <span style={{
           fontSize: '11px',
           fontWeight: 700,

@@ -33,14 +33,22 @@ export default function Profile() {
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          const data = docSnap.data();
+          let data = docSnap.data();
+
+          // Migración: generar linkCode si el usuario no lo tiene (cuentas antiguas)
+          if (!data.linkCode) {
+            const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            await updateDoc(docRef, { linkCode: newCode });
+            data = { ...data, linkCode: newCode };
+          }
+
           setUserData(data);
           setNewName(data.name || '');
 
           if (data.linkedPartnerId) {
             const partnerSnap = await getDoc(doc(db, 'users', data.linkedPartnerId));
             if (partnerSnap.exists()) {
-               setPartnerData(partnerSnap.data());
+               setPartnerData({ ...partnerSnap.data(), uid: partnerSnap.id });
             } else {
                await updateDoc(docRef, { linkedPartnerId: '' });
                setUserData({ ...data, linkedPartnerId: '' });
@@ -156,38 +164,51 @@ export default function Profile() {
     }
   };
 
+  const [linkLoading, setLinkLoading] = useState(false);
+
   const handleLinkPartner = async (e) => {
     e.preventDefault();
     setLinkError(''); setLinkSuccess('');
-    if (linkInput.length !== 6) { setLinkError('El código debe tener 6 caracteres.'); return; }
+    const code = linkInput.trim().toUpperCase();
+    if (code.length !== 6) { setLinkError('El código debe tener 6 caracteres.'); return; }
+    if (code === userData?.linkCode) { setLinkError('No puedes vincularte con tu propio código.'); return; }
 
+    setLinkLoading(true);
     try {
-      const q = query(collection(db, 'users'), where('linkCode', '==', linkInput.toUpperCase()));
+      const q = query(collection(db, 'users'), where('linkCode', '==', code));
       const querySnapshot = await getDocs(q);
 
-      if (querySnapshot.empty) { setLinkError('No se encontró cuenta con ese código.'); return; }
+      if (querySnapshot.empty) { setLinkError('No se encontró cuenta con ese código. Verifica que sea correcto.'); return; }
 
       const partnerDoc = querySnapshot.docs[0];
-      const partnerObj = partnerDoc.data();
+      // Usar doc.id como UID real del documento — más fiable que el campo uid
+      const partnerUid = partnerDoc.id;
+      const partnerObj = { ...partnerDoc.data(), uid: partnerUid };
       const user = auth.currentUser;
-      
+
+      if (partnerUid === user.uid) { setLinkError('No puedes vincularte con tu propio código.'); return; }
+
+      // Actualizar ambos usuarios atómicamente
       await updateDoc(doc(db, 'users', user.uid), {
-        linkedPartnerId: partnerObj.uid,
-        linkedPartners: arrayUnion({ uid: partnerObj.uid, name: partnerObj.name })
+        linkedPartnerId: partnerUid,
+        linkedPartners: arrayUnion({ uid: partnerUid, name: partnerObj.name || 'Pareja' })
       });
 
-      await updateDoc(doc(db, 'users', partnerObj.uid), {
-        linkedPartnerId: user.uid
+      await updateDoc(doc(db, 'users', partnerUid), {
+        linkedPartnerId: user.uid,
+        linkedPartners: arrayUnion({ uid: user.uid, name: userData?.name || 'Pareja' })
       });
 
-      setLinkSuccess(`¡Vinculación exitosa con ${partnerObj.name}!`);
-      setUserData(prev => ({ ...prev, linkedPartnerId: partnerObj.uid }));
+      setLinkSuccess(`¡Vinculación exitosa con ${partnerObj.name || 'tu pareja'}! 💕`);
+      setUserData(prev => ({ ...prev, linkedPartnerId: partnerUid }));
       setPartnerData(partnerObj);
       setLinkInput('');
 
     } catch (err) {
-      console.error(err);
-      setLinkError('Error al intentar vincular.');
+      console.error('Error al vincular pareja:', err);
+      setLinkError('Error al vincular. Verifica tu conexión e inténtalo de nuevo.');
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -591,39 +612,50 @@ export default function Profile() {
         )}
 
         <div>
-          {userData?.role === 'mujer' ? (
-            <>
-              <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '0.8rem', marginTop: 0, fontWeight: 600 }}>
-                {userData?.linkedPartnerId ? 'Vincular nueva cuenta' : 'Comparte tu código con tu pareja:'}
-              </p>
-              <div style={{
-                padding: '1rem', borderRadius: '16px', textAlign: 'center',
-                background: 'rgba(var(--color-primary-rgb,244,63,94),0.05)',
-                border: '1.5px dashed rgba(var(--color-primary-rgb,244,63,94),0.25)'
-              }}>
-                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Tu código de acceso</span>
-                <strong style={{ fontSize: '1.8rem', letterSpacing: '6px', color: 'var(--color-text-main)', fontFamily: 'monospace' }}>{userData?.linkCode || '------'}</strong>
-              </div>
-            </>
-          ) : (
-            <form onSubmit={handleLinkPartner}>
-              <p style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', marginBottom: '0.8rem', marginTop: 0, fontWeight: 600 }}>
-                {userData?.linkedPartnerId ? 'Vincular otra cuenta' : 'Ingresa el código de 6 caracteres:'}
-              </p>
-              <input
-                type="text" maxLength={6} value={linkInput}
-                onChange={e => setLinkInput(e.target.value.toUpperCase())}
-                placeholder="EJ: XB72PA"
-                className="prof-input"
-                style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem', marginBottom: '0.8rem', textTransform: 'uppercase' }}
-              />
-              {linkError && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>{linkError}</p>}
-              {linkSuccess && <p style={{ color: '#10b981', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>{linkSuccess}</p>}
-              <button type="submit" className="prof-btn-primary" style={{ width: '100%' }}>
-                <Link2 size={16} /> Vincular ahora
-              </button>
-            </form>
-          )}
+          {/* Tu propio código — visible para TODOS los roles */}
+          <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem', marginTop: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Tu código — compártelo con tu pareja
+          </p>
+          <div style={{
+            padding: '0.9rem', borderRadius: '14px', textAlign: 'center',
+            background: 'rgba(var(--color-primary-rgb,244,63,94),0.05)',
+            border: '1.5px dashed rgba(var(--color-primary-rgb,244,63,94),0.25)',
+            marginBottom: '1.2rem'
+          }}>
+            {userData?.linkCode ? (
+              <strong style={{ fontSize: '2rem', letterSpacing: '8px', color: 'var(--color-text-main)', fontFamily: 'monospace' }}>
+                {userData.linkCode}
+              </strong>
+            ) : (
+              <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                Código no disponible. Vuelve a iniciar sesión.
+              </span>
+            )}
+          </div>
+
+          {/* Formulario para ingresar el código de la pareja — visible para TODOS */}
+          <form onSubmit={handleLinkPartner}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem', marginTop: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {userData?.linkedPartnerId ? 'Cambiar vinculación — código de tu pareja' : 'Ingresar código de tu pareja'}
+            </p>
+            <input
+              type="text" maxLength={6} value={linkInput}
+              onChange={e => setLinkInput(e.target.value.toUpperCase())}
+              placeholder="EJ: XB72PA"
+              className="prof-input"
+              style={{ textAlign: 'center', letterSpacing: '4px', fontSize: '1.2rem', marginBottom: '0.8rem', textTransform: 'uppercase' }}
+              disabled={linkLoading}
+            />
+            {linkError && <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>⚠️ {linkError}</p>}
+            {linkSuccess && <p style={{ color: '#10b981', fontSize: '0.82rem', margin: '0 0 0.5rem', fontWeight: 600 }}>{linkSuccess}</p>}
+            <button type="submit" className="prof-btn-primary" style={{ width: '100%', opacity: linkLoading ? 0.7 : 1 }} disabled={linkLoading}>
+              {linkLoading ? (
+                <><div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'profSpin 0.8s linear infinite' }} /> Vinculando...</>
+              ) : (
+                <><Link2 size={16} /> Vincular ahora</>
+              )}
+            </button>
+          </form>
         </div>
       </div>
 
