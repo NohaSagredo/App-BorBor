@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from './ThemeProvider';
 
-export default function TopAppBar({ avatarUrl, partnerAvatarUrl, level = 1, coins = 0, homeRoute = '/mujer' }) {
+export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level = 1, coins = 0, homeRoute = '/mujer' }) {
   const navigate = useNavigate();
   const { themeId, setTheme, themes } = useTheme();
 
@@ -82,7 +82,7 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, level = 1, coin
           </button>
 
           {/* Avatar pareja (solo si está vinculado) */}
-          {partnerAvatarUrl && (
+          {isLinked && (
             <div style={{ position: 'relative', marginLeft: '-10px', zIndex: 1 }}>
               {/* Anillo de vinculación */}
               <div style={{
@@ -97,7 +97,11 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, level = 1, coin
                   overflow: 'hidden', background: '#1e1b2e',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <img src={partnerAvatarUrl} alt="Pareja" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  {partnerAvatarUrl ? (
+                    <img src={partnerAvatarUrl} alt="Pareja" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <span style={{ fontSize: '1rem' }}>👤</span>
+                  )}
                 </div>
               </div>
               {/* Icono de vinculación */}

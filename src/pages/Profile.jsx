@@ -215,9 +215,9 @@ export default function Profile() {
   const handleUnlink = async () => {
     if (!window.confirm("¿Seguro que deseas desvincular a tu pareja actual?")) return;
     try {
-      await updateDoc(doc(db, 'users', auth.currentUser.uid), { linkedPartnerId: '' });
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), { linkedPartnerId: '', linkedPartners: [] });
       if (partnerData?.uid) {
-         try { await updateDoc(doc(db, 'users', partnerData.uid), { linkedPartnerId: '' }); } catch { /* best-effort unlink */ }
+         try { await updateDoc(doc(db, 'users', partnerData.uid), { linkedPartnerId: '', linkedPartners: [] }); } catch { /* best-effort unlink */ }
       }
       setPartnerData(null);
       setUserData(prev => ({ ...prev, linkedPartnerId: '' }));

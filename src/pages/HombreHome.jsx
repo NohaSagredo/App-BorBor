@@ -258,7 +258,9 @@ export default function HombreHome() {
 
           setLinkedUsers(partnersArray);
           
-          if (partnersArray.length > 0) {
+          if (data.linkedPartnerId) {
+             setActivePartnerId(data.linkedPartnerId);
+          } else if (partnersArray.length > 0) {
              setActivePartnerId(prev => prev || partnersArray[0].uid);
           }
         }
