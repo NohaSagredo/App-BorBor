@@ -8,9 +8,14 @@ service cloud.firestore {
              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isLinkedPartner(userId) {
+      return request.auth != null &&
+             get(/databases/$(database)/documents/users/$(userId)).data.linkedPartnerId == request.auth.uid;
+    }
+
     match /users/{userId} {
-      // Lectura completa: propio o admin
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      // Lectura completa: propio, admin, o pareja vinculada
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || isLinkedPartner(userId));
 
       // Escritura: propio, admin, o actualizar solo campos de vinculación en doc ajeno
       allow write: if request.auth != null && (
@@ -22,7 +27,8 @@ service cloud.firestore {
       );
 
       match /{allSubcollections=**} {
-        allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+        allow read: if request.auth != null && (request.auth.uid == userId || isAdmin() || isLinkedPartner(userId));
+        allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
       }
     }
 
