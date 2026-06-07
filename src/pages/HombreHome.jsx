@@ -9,6 +9,14 @@ import GlobalLoader from '../components/GlobalLoader';
 import { useTheme } from '../components/ThemeProvider';
 import { LEVELS } from '../utils/kegelLevels';
 
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return new Date(dateStr);
+  const [year, month, day] = parts.map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export default function HombreHome() {
   const navigate = useNavigate();
   const { themeId, setTheme, themes } = useTheme();
@@ -133,7 +141,7 @@ export default function HombreHome() {
     const activeStart = stats.currentStart || partnerStartDate;
     if (!activeStart || !date) return { bg: 'transparent', color: 'var(--color-text-muted)' };
     
-    const start = new Date(activeStart);
+    const start = parseLocalDate(activeStart);
     start.setHours(0,0,0,0);
     const d = new Date(date);
     d.setHours(0,0,0,0);
@@ -216,7 +224,7 @@ export default function HombreHome() {
     let activeStartStr = stats.currentStart || partnerData.lastPeriodStart;
     if (!activeStartStr) return '--';
 
-    const start = new Date(activeStartStr);
+    const start = parseLocalDate(activeStartStr);
     start.setHours(0,0,0,0);
     const ovulationOffsetDays = stats.cycleLength - 14; 
     

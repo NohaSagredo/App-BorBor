@@ -10,6 +10,14 @@ import GlobalLoader from '../components/GlobalLoader';
 import { useTheme } from '../components/ThemeProvider';
 import { LEVELS } from '../utils/kegelLevels';
 
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return new Date();
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return new Date(dateStr);
+  const [year, month, day] = parts.map(Number);
+  return new Date(year, month - 1, day);
+};
+
 export default function MujerHome() {
   const navigate = useNavigate();
   const { themeId, setTheme, themes } = useTheme();
@@ -315,7 +323,7 @@ export default function MujerHome() {
 
   const calculatePhase = (startDateStr, cycleLength = 28, logs = {}) => {
     if (!startDateStr) return;
-    const start = new Date(startDateStr);
+    const start = parseLocalDate(startDateStr);
     const today = new Date();
     start.setHours(0,0,0,0);
     today.setHours(0,0,0,0);
@@ -380,7 +388,7 @@ export default function MujerHome() {
     const activeStart = stats.currentStart || lastPeriodStart;
     
     if (!activeStart || !date) return { bg: 'transparent', color: 'var(--color-text-muted)', border: 'transparent' };
-    const start = new Date(activeStart);
+    const start = parseLocalDate(activeStart);
     start.setHours(0,0,0,0);
     const d = new Date(date);
     d.setHours(0,0,0,0);
@@ -870,7 +878,7 @@ export default function MujerHome() {
                     const stats = getCycleStats(myLogs);
                     const activeStart = stats.currentStart || lastPeriodStart;
                     if (!activeStart) return 1;
-                    const diffTime = new Date().setHours(0,0,0,0) - new Date(activeStart).setHours(0,0,0,0);
+                    const diffTime = new Date().setHours(0,0,0,0) - parseLocalDate(activeStart).setHours(0,0,0,0);
                     const cycleDayOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                     return (cycleDayOffset % (stats.cycleLength || 28)) + 1;
                   })()}
@@ -989,7 +997,7 @@ export default function MujerHome() {
               const stats = getCycleStats(myLogs);
               const activeStart = stats.currentStart || lastPeriodStart;
               if (!activeStart) return 1;
-              const diffTime = new Date().setHours(0,0,0,0) - new Date(activeStart).setHours(0,0,0,0);
+              const diffTime = new Date().setHours(0,0,0,0) - parseLocalDate(activeStart).setHours(0,0,0,0);
               const cycleDayOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
               return (cycleDayOffset % (stats.cycleLength || 28)) + 1;
             })()} 
