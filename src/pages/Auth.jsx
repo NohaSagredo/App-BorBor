@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { 
@@ -10,7 +10,8 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock, User, Sparkles } from 'lucide-react';
@@ -34,40 +35,56 @@ export default function Auth() {
   const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [googleUser, setGoogleUser] = useState(null);
 
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          const user = result.user;
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.role) {
+              navigate(userData.role === 'mujer' ? '/mujer' : '/hombre');
+            } else {
+              setGoogleUser(user);
+              setName(user.displayName || '');
+              setShowRoleSelection(true);
+            }
+          } else {
+            setGoogleUser(user);
+            setName(user.displayName || '');
+            setShowRoleSelection(true);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        if (err.code === 'auth/unauthorized-domain') {
+          setError('Este dominio no está autorizado en Firebase. Añádelo en la consola.');
+        } else {
+          setError('Error al completar el inicio de sesión con Google.');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkRedirectResult();
+  }, [navigate]);
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        if (userData.role) {
-          navigate(userData.role === 'mujer' ? '/mujer' : '/hombre');
-        } else {
-          setGoogleUser(user);
-          setName(user.displayName || '');
-          setShowRoleSelection(true);
-        }
-      } else {
-        setGoogleUser(user);
-        setName(user.displayName || '');
-        setShowRoleSelection(true);
-      }
+      await signInWithRedirect(auth, provider);
     } catch (err) {
       console.error(err);
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('El inicio de sesión fue cancelado.');
-      } else {
-        setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
-      }
-    } finally {
+      setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
       setLoading(false);
     }
   };
