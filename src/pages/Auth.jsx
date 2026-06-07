@@ -11,7 +11,8 @@ import {
   browserSessionPersistence,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult
+  getRedirectResult,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { ArrowLeft, LogIn, UserPlus, Mail, Lock, User, Sparkles } from 'lucide-react';
