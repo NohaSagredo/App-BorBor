@@ -47,6 +47,7 @@ export default function Auth() {
         } else {
           setError('Error al completar el inicio de sesión con Google.');
         }
+        localStorage.removeItem('google_auth_in_progress');
       }
     };
     checkAuthAndRedirect();
@@ -57,8 +58,11 @@ export default function Auth() {
         try {
           const userDocRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userDocRef);
+          const googleAuthInProgress = localStorage.getItem('google_auth_in_progress') === 'true';
+          const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
 
           if (userDoc.exists()) {
+            localStorage.removeItem('google_auth_in_progress');
             const userData = userDoc.data();
             if (userData.role) {
               navigate(userData.role === 'mujer' ? '/mujer' : '/hombre');
@@ -68,8 +72,7 @@ export default function Auth() {
               setShowRoleSelection(true);
             }
           } else {
-            const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
-            if (isGoogleUser) {
+            if (googleAuthInProgress || isGoogleUser) {
               setGoogleUser(user);
               setName(user.displayName || '');
               setShowRoleSelection(true);
@@ -90,6 +93,7 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
+    localStorage.setItem('google_auth_in_progress', 'true');
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
@@ -97,6 +101,7 @@ export default function Auth() {
     } catch (err) {
       console.error(err);
       setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
+      localStorage.removeItem('google_auth_in_progress');
       setLoading(false);
     }
   };
@@ -116,6 +121,7 @@ export default function Auth() {
         linkCode: generatedLinkCode,
         linkedPartnerId: ''
       });
+      localStorage.removeItem('google_auth_in_progress');
       navigate(role === 'mujer' ? '/mujer' : '/hombre');
     } catch (err) {
       console.error(err);
