@@ -36,13 +36,24 @@ export default function Auth() {
   const [googleUser, setGoogleUser] = useState(null);
 
   useEffect(() => {
-    const checkRedirectResult = async () => {
-      setLoading(true);
-      setError('');
+    const checkAuthAndRedirect = async () => {
       try {
-        const result = await getRedirectResult(auth);
-        if (result && result.user) {
-          const user = result.user;
+        await getRedirectResult(auth);
+      } catch (err) {
+        console.error(err);
+        if (err.code === 'auth/unauthorized-domain') {
+          setError('Este dominio no está autorizado en Firebase. Añádelo en la consola.');
+        } else {
+          setError('Error al completar el inicio de sesión con Google.');
+        }
+      }
+    };
+    checkAuthAndRedirect();
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setLoading(true);
+        try {
           const userDocRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userDocRef);
 
@@ -56,23 +67,23 @@ export default function Auth() {
               setShowRoleSelection(true);
             }
           } else {
-            setGoogleUser(user);
-            setName(user.displayName || '');
-            setShowRoleSelection(true);
+            const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
+            if (isGoogleUser) {
+              setGoogleUser(user);
+              setName(user.displayName || '');
+              setShowRoleSelection(true);
+            }
           }
+        } catch (err) {
+          console.error(err);
+          setError('Error al verificar el perfil del usuario.');
+        } finally {
+          setLoading(false);
         }
-      } catch (err) {
-        console.error(err);
-        if (err.code === 'auth/unauthorized-domain') {
-          setError('Este dominio no está autorizado en Firebase. Añádelo en la consola.');
-        } else {
-          setError('Error al completar el inicio de sesión con Google.');
-        }
-      } finally {
-        setLoading(false);
       }
-    };
-    checkRedirectResult();
+    });
+
+    return () => unsubscribe();
   }, [navigate]);
 
   const handleGoogleSignIn = async () => {
