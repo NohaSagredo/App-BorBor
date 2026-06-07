@@ -1,5 +1,5 @@
 import './App.css';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Welcome from './pages/Welcome';
 import Auth from './pages/Auth';
 import MujerHome from './pages/MujerHome';
@@ -13,6 +13,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 import GlobalBackground from './components/GlobalBackground';
 import TopAppBar from './components/TopAppBar';
 import BottomNavBar from './components/BottomNavBar';
+import GlobalLoader from './components/GlobalLoader';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -21,10 +22,12 @@ import { LEVELS } from './utils/kegelLevels';
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isWide = ['/academia', '/admin', '/insights'].includes(location.pathname);
   
   const [userData, setUserData] = useState(null);
   const [partnerData, setPartnerData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let unsubscribePartner = null;
@@ -37,6 +40,7 @@ function AppContent() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             setUserData(data);
+            setLoading(false);
             
             if (data.linkedPartnerId) {
               const partnerRef = doc(db, 'users', data.linkedPartnerId);
@@ -57,15 +61,19 @@ function AppContent() {
               }
               setPartnerData(null);
             }
+          } else {
+            setLoading(false);
           }
         }, (err) => {
           console.error("Error global de usuario en App.jsx:", err);
+          setLoading(false);
         });
       } else {
         if (unsubscribeUser) unsubscribeUser();
         if (unsubscribePartner) unsubscribePartner();
         setUserData(null);
         setPartnerData(null);
+        setLoading(false);
       }
     });
 
@@ -76,12 +84,27 @@ function AppContent() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      if (userData && ['/', '/auth'].includes(location.pathname)) {
+        const targetRoute = userData.role === 'Hombre' || userData.role === 'hombre' ? '/hombre' : '/mujer';
+        navigate(targetRoute, { replace: true });
+      } else if (!userData && !['/', '/auth'].includes(location.pathname)) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [loading, userData, location.pathname, navigate]);
+
   const hideNavbars = ['/', '/auth', '/admin'].includes(location.pathname);
   const homeRoute = userData?.role === 'Hombre' ? '/hombre' : '/mujer';
 
   const userXp = userData?.xp || 0;
   const currentLevelObj = [...LEVELS].reverse().find(l => l.xpRequired <= userXp) || LEVELS[0];
   const currentLevel = currentLevelObj.id;
+
+  if (loading) {
+    return <GlobalLoader />;
+  }
   
   return (
     <div className="app-root-wrapper" style={{ 
