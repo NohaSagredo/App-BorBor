@@ -29,6 +29,7 @@ export default function HombreHome() {
   const [partnerData, setPartnerData] = useState(null);
   const [partnerLogs, setPartnerLogs] = useState({});
   const [todayLog, setTodayLog] = useState(null);
+  const [viewDate, setViewDate] = useState(new Date());
   
 
   // Diccionario de Traducción Lógica -> UI
@@ -85,9 +86,8 @@ export default function HombreHome() {
 
   // --- Lógica de Calendario de Riesgo ---
   const generateCalendar = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
     let firstDayIndex = new Date(year, month, 1).getDay();
@@ -96,7 +96,8 @@ export default function HombreHome() {
     const days = [];
     for (let i = 0; i < firstDayIndex; i++) days.push(null);
     for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i));
-    return { days, monthName: new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(today), year };
+    const monthName = new Intl.DateTimeFormat('es-ES', { month: 'long' }).format(viewDate);
+    return { days, monthName: monthName.charAt(0).toUpperCase() + monthName.slice(1), year };
   };
 
   const getCycleStats = (logs) => {
@@ -737,14 +738,24 @@ export default function HombreHome() {
            </div>
 
            <div className="glass-panel animate-fade-in" style={{ padding: '1.5rem', background: 'var(--color-surface)' }} key={`calendar-${activePartnerId}`}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <div>
-                <h3 style={{ color: 'var(--color-text-main)', marginBottom: '0.2rem' }}>Tracker de Fertilidad</h3>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>
-                  {partnerData.name} • {generateCalendar().monthName}
-                </span>
-              </div>
-            </div>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+               <div>
+                 <h3 style={{ color: 'var(--color-text-main)', marginBottom: '0.2rem' }}>Tracker de Fertilidad</h3>
+                 <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>
+                   {partnerData.name} • {generateCalendar().monthName} {generateCalendar().year}
+                 </span>
+               </div>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <button
+                   onClick={(e) => { e.stopPropagation(); setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)); }}
+                   style={{ background: 'rgba(255,255,255,0.08)', border: 'none', width: 28, height: 28, borderRadius: '50%', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                 >‹</button>
+                 <button
+                   onClick={(e) => { e.stopPropagation(); setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)); }}
+                   style={{ background: 'rgba(255,255,255,0.08)', border: 'none', width: 28, height: 28, borderRadius: '50%', fontSize: '0.9rem', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                 >›</button>
+               </div>
+             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'center', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 'bold' }}>
               <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
