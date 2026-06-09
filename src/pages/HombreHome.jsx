@@ -49,11 +49,29 @@ export default function HombreHome() {
       cramps: { label: 'Cólicos', icon: '⚡' },
       headache: { label: 'Cabeza', icon: '🤕' },
       breasts: { label: 'Senos', icon: '🍈' },
+      sore_breasts: { label: 'Dolor de senos', icon: '🍈' },
+      acne: { label: 'Acné', icon: '🔴' },
+      mood_swings: { label: 'Cambios de humor', icon: '🌪️' },
+      itching: { label: 'Picazón/Ardor', icon: '🔥' },
+      bloating: { label: 'Inflamación', icon: '💖' },
+      // Flujo Vaginal
+      dry: { label: 'Seco', icon: '🏖️' },
+      sticky: { label: 'Pegajoso', icon: '🍯' },
+      creamy: { label: 'Cremoso', icon: '🥛' },
+      watery: { label: 'Acuoso', icon: '🌊' },
+      egg_white: { label: 'Clara de huevo', icon: '🥚' },
+      bad_odor: { label: 'Mal olor', icon: '⚠️' },
+      lumpy: { label: 'Grumoso', icon: '🧫' },
+      // Color del flujo
+      pink: { label: 'Rosado', icon: '🌸' },
+      red: { label: 'Rojo', icon: '🍎' },
+      dark: { label: 'Oscuro/Marrón', icon: '🍂' },
       // Emociones
       happy: { label: 'Feliz', icon: '😊' },
       sensitive: { label: 'Sensible', icon: '🥺' },
       sad: { label: 'Triste', icon: '😢' },
       irritable: { label: 'Irritable', icon: '😤' },
+      calm: { label: 'Calmada', icon: '😌' },
       // Deseo
       high_libido: { label: 'Alta Líbido', icon: '🔥' },
       low_energy: { label: 'Agotada', icon: '🔋' },
@@ -181,7 +199,10 @@ export default function HombreHome() {
         const dayOfCycle = diffDays >= 0 ? diffDays + 1 : 0; 
 
         if (dayOfCycle > stats.cycleLength - 10) {
-            if (logs.pain === 'cramps' || logs.pain === 'breasts' || ['irritable', 'sad', 'anxious'].includes(logs.emotion)) {
+            const hasCramps = logs.pain === 'cramps' || logs.symptoms?.includes('cramps');
+            const hasBreasts = logs.pain === 'breasts' || logs.symptoms?.includes('sore_breasts') || logs.symptoms?.includes('breasts');
+            const emotionVal = logs.emotions || logs.emotion;
+            if (hasCramps || hasBreasts || ['irritable', 'sad', 'anxious'].includes(emotionVal)) {
                return { bg: 'var(--color-unsafe)', color: 'var(--color-danger)', isToday, dot: '🌩️', logs };
             }
         }
@@ -355,9 +376,17 @@ export default function HombreHome() {
 
      const symptomsCount = {};
      logEntries.forEach(log => {
+        if (Array.isArray(log.symptoms)) {
+           log.symptoms.forEach(sym => {
+              if (sym && sym !== 'none') {
+                 symptomsCount[sym] = (symptomsCount[sym] || 0) + 1;
+              }
+           });
+        }
         if (log.pain && log.pain !== 'none') symptomsCount[log.pain] = (symptomsCount[log.pain] || 0) + 1;
         if (log.cramps && log.cramps !== 'Sin dolor') symptomsCount[log.cramps] = (symptomsCount[log.cramps] || 0) + 1;
-        if (log.emotion && log.emotion !== 'calm') symptomsCount[log.emotion] = (symptomsCount[log.emotion] || 0) + 1;
+        const emotionVal = log.emotions || log.emotion;
+        if (emotionVal && emotionVal !== 'calm') symptomsCount[emotionVal] = (symptomsCount[emotionVal] || 0) + 1;
      });
      const sortedSymptoms = Object.entries(symptomsCount).sort((a,b)=>b[1]-a[1]);
      const topSymptom = sortedSymptoms[0] || ['Ninguno', 0];
@@ -735,9 +764,9 @@ export default function HombreHome() {
                 
                 let subIcon = null;
                 if (styles.logs) {
-                    if (styles.logs.energy === 'high_libido' || styles.logs.libido === 'Alta') subIcon = '🔥';
-                    else if (styles.logs.pain && styles.logs.pain !== 'none') subIcon = '⚡';
-                    else if (styles.logs.cramps && styles.logs.cramps !== 'Sin dolor') subIcon = '⚡';
+                    const hasSymptom = (styles.logs.symptoms && styles.logs.symptoms.length > 0) || (styles.logs.pain && styles.logs.pain !== 'none') || (styles.logs.cramps && styles.logs.cramps !== 'Sin dolor');
+                    if (styles.logs.energy === 'high_libido' || styles.logs.libido === 'Alta' || styles.logs.intimacy === 'high_libido') subIcon = '🔥';
+                    else if (hasSymptom) subIcon = '⚡';
                     else if (styles.logs.intimacy === 'unprotected_in') subIcon = '🎯'; // Si la mujer marcó que hubo intimidad adentro ese día
                 }
 
@@ -816,31 +845,57 @@ export default function HombreHome() {
                 
                 {todayLog ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: 'auto' }}>
-                     {['emotions', 'energy', 'pain', 'bleeding'].map(key => {
-                        const val = todayLog[key];
-                        // Filtrar vacios o 'none' si no queremos saturar
-                        if (!val || val === 'none') return null;
+                     {(() => {
+                        const pills = [];
                         
-                        const data = SYMPTOM_DICT[val];
-                        if (!data) return null;
+                        // 1. Bleeding
+                        if (todayLog.bleeding && todayLog.bleeding !== 'none') {
+                           pills.push(todayLog.bleeding);
+                        }
+                        // 2. Fluid
+                        if (todayLog.fluid && todayLog.fluid !== 'none') {
+                           pills.push(todayLog.fluid);
+                        }
+                        // 3. Emotions
+                        const emotionVal = todayLog.emotions || todayLog.emotion;
+                        if (emotionVal && emotionVal !== 'none') {
+                           pills.push(emotionVal);
+                        }
+                        // 4. Intimacy
+                        if (todayLog.intimacy && todayLog.intimacy !== 'none') {
+                           pills.push(todayLog.intimacy);
+                        }
+                        // 5. Symptoms array
+                        if (Array.isArray(todayLog.symptoms)) {
+                           todayLog.symptoms.forEach(sym => {
+                              if (sym && sym !== 'none') pills.push(sym);
+                           });
+                        }
+                        // 6. Legacy pain
+                        if (todayLog.pain && todayLog.pain !== 'none') {
+                           pills.push(todayLog.pain);
+                        }
                         
-                        // Si es negativo (dolor, triste) pintar fondo rojo, si no gris
-                        const isNegative = ['sad', 'irritable', 'cramps', 'headache', 'heavy'].includes(val);
-                        const pillBg = isNegative ? '#fee2e2' : '#f3f4f6';
-                        const pillColor = isNegative ? '#b91c1c' : '#4b5563';
-
-                        return (
-                           <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: pillBg, padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-                               <span>{data.icon}</span>
-                               <span style={{ color: pillColor }}>{data.label}</span>
-                           </div>
-                        )
-                     })}
-                     
-                     {/* Pill fallback por si marcó algo q no esta en el map de arriba o puro 'none' */}
-                     {Object.keys(todayLog).filter(k => todayLog[k] && !['date', 'timestamp'].includes(k)).length === 0 && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Reporte en blanco</span>
-                     )}
+                        if (pills.length === 0) {
+                           return <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>Reporte en blanco</span>;
+                        }
+                        
+                        return pills.map((val, idx) => {
+                           const data = SYMPTOM_DICT[val];
+                           if (!data) return null;
+                           
+                           const isNegative = ['sad', 'irritable', 'cramps', 'sore_breasts', 'headache', 'heavy', 'itching', 'bad_odor', 'lumpy'].includes(val);
+                           const pillBg = isNegative ? '#fee2e2' : '#f3f4f6';
+                           const pillColor = isNegative ? '#b91c1c' : '#4b5563';
+                           
+                           return (
+                              <div key={`${val}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: pillBg, padding: '4px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                  <span>{data.icon}</span>
+                                  <span style={{ color: pillColor }}>{data.label}</span>
+                              </div>
+                           );
+                        });
+                     })()}
                   </div>
                 ) : (
                   <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '5px', opacity: 0.6 }}>
