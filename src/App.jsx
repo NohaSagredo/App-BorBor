@@ -87,7 +87,7 @@ function AppContent() {
   useEffect(() => {
     if (!loading) {
       if (userData && ['/', '/auth'].includes(location.pathname)) {
-        const targetRoute = userData.role === 'Hombre' || userData.role === 'hombre' ? '/hombre' : '/mujer';
+        const targetRoute = ['hombre', 'pareja'].includes(userData.role?.toLowerCase()?.trim()) ? '/hombre' : '/mujer';
         navigate(targetRoute, { replace: true });
       } else if (!userData && !['/', '/auth'].includes(location.pathname)) {
         navigate('/', { replace: true });
@@ -96,7 +96,7 @@ function AppContent() {
   }, [loading, userData, location.pathname, navigate]);
 
   const hideNavbars = ['/', '/auth', '/admin'].includes(location.pathname);
-  const homeRoute = userData?.role === 'Hombre' ? '/hombre' : '/mujer';
+  const homeRoute = ['hombre', 'pareja'].includes(userData?.role?.toLowerCase()?.trim()) ? '/hombre' : '/mujer';
 
   const userXp = userData?.xp || 0;
   const currentLevelObj = [...LEVELS].reverse().find(l => l.xpRequired <= userXp) || LEVELS[0];

@@ -77,7 +77,14 @@ export default function Profile() {
 
   const handleChangeRole = (e) => {
     const newRole = e.target.value;
-    if (!auth.currentUser || newRole === userData.role) return;
+    if (!auth.currentUser) return;
+    
+    // Normalize role comparison so 'hombre' and 'pareja' are equivalent
+    const isCurrentMale = ['hombre', 'pareja'].includes(userData?.role);
+    const isNewMale = ['hombre', 'pareja'].includes(newRole);
+    if ((isCurrentMale && isNewMale) || (userData?.role === newRole)) {
+      return;
+    }
     if (userData.roleChanged) {
        alert("Solo se permite realizar un cambio de perfil por cuenta.");
        return;
@@ -422,8 +429,8 @@ export default function Profile() {
         }} />
         <div style={{ display: 'flex', gap: '8px', marginTop: '0.8rem', position: 'relative', zIndex: 2 }}>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
-            <span style={{ fontSize:'0.95rem' }}>{userData?.role === 'mujer' ? '🌸' : '💪'}</span>
-            <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:700 }}>{userData?.role === 'mujer' ? 'Mujer' : 'Hombre'}</span>
+            <span style={{ fontSize:'0.95rem' }}>{userData?.role === 'mujer' ? '🌸' : '👥'}</span>
+            <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:700 }}>{userData?.role === 'mujer' ? 'Mujer' : 'Pareja'}</span>
           </div>
           <div style={{ flex:1, background:'rgba(255,255,255,0.12)', backdropFilter:'blur(6px)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:'14px', padding:'0.5rem 0.3rem', display:'flex', flexDirection:'column', alignItems:'center', gap:'2px' }}>
             <span style={{ fontSize:'0.95rem' }}>{userData?.linkedPartnerId ? '💕' : '🔗'}</span>
@@ -486,14 +493,14 @@ export default function Profile() {
 
         <label style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>Tipo de perfil</label>
         <select
-          value={userData?.role || 'mujer'}
+          value={['hombre', 'pareja'].includes(userData?.role) ? 'pareja' : (userData?.role || 'mujer')}
           onChange={handleChangeRole}
           disabled={userData?.roleChanged}
           className="prof-input"
           style={{ appearance: 'none', opacity: userData?.roleChanged ? 0.5 : 1 }}
         >
           <option value="mujer">🌸 Mujer</option>
-          <option value="hombre">💪 Hombre / Pareja</option>
+          <option value="pareja">👥 Pareja</option>
         </select>
         {userData?.roleChanged && (
           <span style={{ fontSize: '0.72rem', color: '#ef4444', marginTop: '0.4rem', display: 'block' }}>Cambio de rol ya utilizado.</span>
@@ -691,7 +698,7 @@ export default function Profile() {
             </div>
             <h2 style={{ color: 'var(--color-text-highlight)', margin: '0 0 0.5rem', fontSize: '1.2rem', fontWeight: 800 }}>Verificación de Seguridad</h2>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: '1.2rem', lineHeight: 1.5 }}>
-              Cambio a <strong>{pendingNewRole === 'mujer' ? 'Mujer' : 'Hombre / Pareja'}</strong>.
+              Cambio a <strong>{pendingNewRole === 'mujer' ? 'Mujer' : 'Pareja'}</strong>.
               <br/><span style={{ color: '#ef4444', fontWeight: 700, fontSize: '0.8rem' }}>¡Este cambio es definitivo y solo se permite una vez!</span>
             </p>
             <input

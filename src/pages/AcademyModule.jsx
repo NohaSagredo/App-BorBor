@@ -249,7 +249,7 @@ export default function AcademyModule() {
     return () => unsubscribe();
   }, []);
 
-  const contentList = role === 'hombre' ? ACADEMY_CONTENT_MALE : ACADEMY_CONTENT_FEMALE;
+  const contentList = ['hombre', 'pareja'].includes(role) ? ACADEMY_CONTENT_MALE : ACADEMY_CONTENT_FEMALE;
 
   const progressRatio = Math.round((readLessons.filter(id => contentList.some(c => c.id === id)).length / contentList.length) * 100) || 0;
 

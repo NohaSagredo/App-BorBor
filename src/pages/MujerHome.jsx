@@ -259,7 +259,7 @@ export default function MujerHome() {
           setUserData(data);
           
           // Guardar rol y validar acceso (Bug Fix #4)
-          if (data.role === 'hombre') {
+          if (data.role === 'hombre' || data.role === 'pareja') {
             navigate('/hombre');
             return;
           }

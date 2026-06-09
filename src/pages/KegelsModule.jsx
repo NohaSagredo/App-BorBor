@@ -492,7 +492,7 @@ export default function KegelsModule() {
           <h2 style={{ fontSize: '1.6rem', color: '#fff', marginBottom: '0.3rem', fontWeight: 800, position: 'relative', zIndex: 2 }}>¡Recompensas!</h2>
           <p style={{ fontSize: '1.1rem', color: 'rgba(255,255,255,0.9)', fontWeight: 700, marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>+{currentLevel.reward} XP / +{currentLevel.reward} Monedas</p>
 
-          <button onClick={() => navigate(userRole?.toLowerCase()?.trim() === 'hombre' ? '/hombre' : '/mujer')} style={{
+          <button onClick={() => navigate(['hombre', 'pareja'].includes(userRole?.toLowerCase()?.trim()) ? '/hombre' : '/mujer')} style={{
             width: '100%', padding: '1rem', borderRadius: '14px',
             background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)',
             border: '1px solid rgba(255,255,255,0.25)',

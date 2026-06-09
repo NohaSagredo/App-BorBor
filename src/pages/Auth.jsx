@@ -299,14 +299,14 @@ export default function Auth() {
                     </button>
                     <button 
                       type="button" 
-                      onClick={() => setRole('hombre')}
+                      onClick={() => setRole('pareja')}
                       className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                        role === 'hombre' 
+                        role === 'pareja' 
                           ? 'bg-primary text-white shadow-[0_4px_15px_rgba(244,63,94,0.25)] scale-[1.02]' 
                           : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
                       }`}
                     >
-                      💪 Hombre
+                      👥 Pareja
                     </button>
                   </div>
                 </div>
@@ -385,14 +385,14 @@ export default function Auth() {
                             </button>
                             <button 
                               type="button" 
-                              onClick={() => setRole('hombre')}
+                              onClick={() => setRole('pareja')}
                               className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                                role === 'hombre' 
+                                role === 'pareja' 
                                   ? 'bg-primary text-white shadow-[0_4px_15px_rgba(244,63,94,0.25)] scale-[1.02]' 
                                   : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10'
                               }`}
                             >
-                              💪 Hombre
+                              👥 Pareja
                             </button>
                           </div>
                         </div>

@@ -311,7 +311,7 @@ export default function AdminDashboard() {
           {[
             { label: 'Usuarios', value: users.length, color: '#fbbf24' },
             { label: 'Mujeres', value: users.filter(u => u.role === 'mujer').length, color: '#f472b6' },
-            { label: 'Hombres', value: users.filter(u => u.role === 'hombre').length, color: '#38bdf8' }
+            { label: 'Parejas', value: users.filter(u => ['hombre', 'pareja'].includes(u.role)).length, color: '#38bdf8' }
           ].map((s, i) => (
             <div key={i} style={{ flex: 1, padding: '0.6rem', borderRadius: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: s.color }}>{s.value}</div>
@@ -381,9 +381,9 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <label style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Tipo de Perfil</label>
-                <select value={editForm.role} onChange={e => setEditForm({...editForm, role: e.target.value})} className="adm-input" style={{ color: '#fbbf24', fontWeight: 700, cursor: 'pointer' }}>
+                <select value={['hombre', 'pareja'].includes(editForm.role) ? 'pareja' : editForm.role} onChange={e => setEditForm({...editForm, role: e.target.value})} className="adm-input" style={{ color: '#fbbf24', fontWeight: 700, cursor: 'pointer' }}>
                   <option value="mujer" style={{ background: '#0f172a' }}>Mujer</option>
-                  <option value="hombre" style={{ background: '#0f172a' }}>Hombre / Pareja</option>
+                  <option value="pareja" style={{ background: '#0f172a' }}>Pareja</option>
                 </select>
               </div>
               <div>
