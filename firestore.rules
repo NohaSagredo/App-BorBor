@@ -6,13 +6,15 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
+             ('role' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isLinkedPartner(userId) {
       return request.auth != null && 
              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('linkedPartnerId', null) == userId;
+             ('linkedPartnerId' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.linkedPartnerId == userId;
     }
 
     match /users/{userId} {
