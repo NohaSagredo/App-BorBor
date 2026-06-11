@@ -11,6 +11,7 @@ import {
   browserSessionPersistence,
   GoogleAuthProvider,
   signInWithRedirect,
+  signInWithPopup,
   getRedirectResult,
   onAuthStateChanged
 } from 'firebase/auth';
@@ -93,14 +94,31 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
-    localStorage.setItem('google_auth_in_progress', 'true');
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
+      
+      // Intentar primero con Popup (evita bloqueos de redirección e ITP de Safari/iOS)
+      await signInWithPopup(auth, provider);
+      
     } catch (err) {
       console.error(err);
-      setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
+      if (err.code === 'auth/popup-blocked') {
+        // Si el navegador bloqueó el popup, reintentamos con redirect
+        try {
+          localStorage.setItem('google_auth_in_progress', 'true');
+          const provider = new GoogleAuthProvider();
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectErr) {
+          console.error(redirectErr);
+          setError('Error al iniciar sesión con Google (Redirección bloqueada).');
+        }
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('Este dominio (nohasagredo.github.io) no está autorizado en la consola de Firebase Authentication.');
+      } else {
+        setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
+      }
       localStorage.removeItem('google_auth_in_progress');
       setLoading(false);
     }
