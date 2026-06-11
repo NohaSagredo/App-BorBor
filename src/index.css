@@ -119,9 +119,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Escalamiento adaptativo para dispositivos móviles */
 @media (max-width: 480px) {
   html {
-    font-size: 18px; /* Aumenta el tamaño base de rem para hacer la tipografía y espaciado más grande en teléfonos */
+    font-size: 21px; /* Aumenta el tamaño base de rem de 18px a 21px para un escalado mayor en teléfonos */
   }
   .responsive-container {
-    padding: 0 16px; /* Menor relleno lateral para ganar espacio de lectura */
+    padding: 0 12px; /* Relleno lateral menor para maximizar el espacio en pantalla */
   }
 }
