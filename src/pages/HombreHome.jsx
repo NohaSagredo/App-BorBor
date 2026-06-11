@@ -30,6 +30,8 @@ export default function HombreHome() {
   const [partnerLogs, setPartnerLogs] = useState({});
   const [todayLog, setTodayLog] = useState(null);
   const [viewDate, setViewDate] = useState(new Date());
+  const [debugError, setDebugError] = useState(null);
+  const [showDebug, setShowDebug] = useState(false);
   
 
   // Diccionario de Traducción Lógica -> UI
@@ -298,6 +300,7 @@ export default function HombreHome() {
         }
       }, (err) => {
         console.error("Error al escuchar usuario:", err);
+        setDebugError("Error al escuchar usuario: " + err.message);
         setLoading(false);
       });
     });
@@ -316,8 +319,12 @@ export default function HombreHome() {
         setPartnerData(partnerSnap.data());
       } else {
         setPartnerData(null);
+        setDebugError(`El perfil de la pareja con ID ${activePartnerId} no existe.`);
       }
-    }, (err) => console.error("Error partner info:", err));
+    }, (err) => {
+      console.error("Error partner info:", err);
+      setDebugError("Error al cargar perfil de pareja: " + err.message + " (ID: " + activePartnerId + ")");
+    });
 
     const logsQuery = query(collection(db, 'users', activePartnerId, 'dailyLogs'));
     const logsUnsubscribe = onSnapshot(logsQuery, (logsRes) => {
@@ -327,7 +334,10 @@ export default function HombreHome() {
       
       const todayStr = new Date().toLocaleDateString('en-CA');
       setTodayLog(fetchedLogs[todayStr] || null);
-    }, (err) => console.error("Error partner logs:", err));
+    }, (err) => {
+      console.error("Error partner logs:", err);
+      setDebugError("Error al cargar bitácoras de pareja: " + err.message + " (ID: " + activePartnerId + ")");
+    });
 
     return () => {
       partnerUnsubscribe();
@@ -947,6 +957,111 @@ export default function HombreHome() {
           </div>
         </div>
       )}
+
+      {/* ═══ PANEL DE DIAGNÓSTICO (DEBUG) ═══ */}
+      <div style={{
+        marginTop: '2rem',
+        padding: '1.2rem',
+        background: 'rgba(30, 41, 59, 0.95)',
+        border: debugError ? '2px dashed #ef4444' : '1px solid var(--glass-border, rgba(255,255,255,0.12))',
+        borderRadius: '16px',
+        color: '#f8fafc',
+        fontFamily: 'monospace',
+        fontSize: '0.8rem',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+        position: 'relative',
+        zIndex: 9999
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+          <h3 style={{ margin: 0, color: debugError ? '#f87171' : '#60a5fa', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+            🛠️ Diagnóstico de Conexión {debugError ? '⚠️ (Error detectado)' : ''}
+          </h3>
+          <button 
+            onClick={() => setShowDebug(!showDebug)}
+            style={{
+              background: debugError ? '#ef4444' : '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '0.75rem'
+            }}
+          >
+            {showDebug ? 'Ocultar Diagnóstico' : 'Ver Diagnóstico'}
+          </button>
+        </div>
+
+        {showDebug && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', textAlign: 'left', lineHeight: '1.4' }}>
+            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px' }}>
+              <strong>🔒 Mi Auth UID:</strong> {auth.currentUser?.uid || 'No autenticado'}
+            </div>
+            <div><strong>👤 Mi Rol:</strong> {userData?.role || 'Cargando...'}</div>
+            <div><strong>🏷️ Mi Nombre:</strong> {userData?.name || 'Cargando...'}</div>
+            <div><strong>🔗 ID Pareja Vinculada (linkedPartnerId):</strong> {userData?.linkedPartnerId || 'Ninguno en base de datos'}</div>
+            <div><strong>👥 Array de Parejas (linkedPartners):</strong> {JSON.stringify(linkedUsers)}</div>
+            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '4px', marginTop: '4px' }}>
+              <strong>🎯 ID Pareja Activa:</strong> {activePartnerId || 'Ninguno'}
+            </div>
+            <div><strong>📋 Datos Pareja:</strong> {partnerData ? `Cargados (Nombre: ${partnerData.name}, Rol: ${partnerData.role})` : 'No se han podido cargar (null)'}</div>
+            <div><strong>📅 Registros Pareja (dailyLogs):</strong> {partnerLogs ? `${Object.keys(partnerLogs).length} días registrados` : 'Ninguno'}</div>
+            
+            {debugError && (
+              <div style={{ background: 'rgba(220, 38, 38, 0.25)', border: '1px solid #ef4444', padding: '10px', borderRadius: '8px', marginTop: '8px', color: '#fca5a5', whiteSpace: 'pre-wrap' }}>
+                <strong>⚠️ ERROR DETECTADO:</strong>
+                <br />
+                {debugError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+              <button 
+                onClick={async () => {
+                  try {
+                    const user = auth.currentUser;
+                    if (user) {
+                      const snap = await getDoc(doc(db, 'users', user.uid));
+                      alert(`Mi Documento:\nExiste: ${snap.exists()}\nDatos: ${JSON.stringify(snap.data(), null, 2)}`);
+                    } else {
+                      alert("No estás autenticado en Firebase.");
+                    }
+                  } catch (e) {
+                    alert(`Error leyendo mi documento: ${e.message}`);
+                  }
+                }}
+                style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+              >
+                Probar Mi Doc
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!activePartnerId) { alert("No hay ID de pareja activa."); return; }
+                  try {
+                    const snap = await getDoc(doc(db, 'users', activePartnerId));
+                    alert(`Documento Pareja:\nExiste: ${snap.exists()}\nDatos: ${JSON.stringify(snap.data(), null, 2)}`);
+                  } catch (e) {
+                    alert(`Error leyendo documento de pareja: ${e.message}\n\nEsto suele ser un problema de permisos en Firestore Rules.`);
+                  }
+                }}
+                style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+              >
+                Probar Doc Pareja
+              </button>
+              <button 
+                onClick={() => {
+                  setDebugError(null);
+                  alert("Historial de errores temporales limpiado.");
+                }}
+                style={{ background: '#4b5563', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+              >
+                Limpiar Errores
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
