@@ -10,9 +10,7 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   GoogleAuthProvider,
-  signInWithRedirect,
   signInWithPopup,
-  getRedirectResult,
   onAuthStateChanged
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -38,32 +36,15 @@ export default function Auth() {
   const [googleUser, setGoogleUser] = useState(null);
 
   useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      try {
-        await getRedirectResult(auth);
-      } catch (err) {
-        console.error(err);
-        if (err.code === 'auth/unauthorized-domain') {
-          setError('Este dominio no está autorizado en Firebase. Añádelo en la consola.');
-        } else {
-          setError('Error al completar el inicio de sesión con Google.');
-        }
-        localStorage.removeItem('google_auth_in_progress');
-      }
-    };
-    checkAuthAndRedirect();
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setLoading(true);
         try {
           const userDocRef = doc(db, 'users', user.uid);
           const userDoc = await getDoc(userDocRef);
-          const googleAuthInProgress = localStorage.getItem('google_auth_in_progress') === 'true';
           const isGoogleUser = user.providerData.some(p => p.providerId === 'google.com');
 
           if (userDoc.exists()) {
-            localStorage.removeItem('google_auth_in_progress');
             const userData = userDoc.data();
             if (userData.role) {
               navigate(userData.role === 'mujer' ? '/mujer' : '/hombre');
@@ -73,7 +54,7 @@ export default function Auth() {
               setShowRoleSelection(true);
             }
           } else {
-            if (googleAuthInProgress || isGoogleUser) {
+            if (isGoogleUser) {
               setGoogleUser(user);
               setName(user.displayName || '');
               setShowRoleSelection(true);
@@ -97,29 +78,16 @@ export default function Auth() {
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       const provider = new GoogleAuthProvider();
-      
-      // Intentar primero con Popup (evita bloqueos de redirección e ITP de Safari/iOS)
       await signInWithPopup(auth, provider);
-      
     } catch (err) {
       console.error(err);
       if (err.code === 'auth/popup-blocked') {
-        // Si el navegador bloqueó el popup, reintentamos con redirect
-        try {
-          localStorage.setItem('google_auth_in_progress', 'true');
-          const provider = new GoogleAuthProvider();
-          await signInWithRedirect(auth, provider);
-          return;
-        } catch (redirectErr) {
-          console.error(redirectErr);
-          setError('Error al iniciar sesión con Google (Redirección bloqueada).');
-        }
+        setError('El navegador bloqueó la ventana emergente de Google. Por favor, permite las ventanas emergentes (popups) en este sitio para iniciar sesión.');
       } else if (err.code === 'auth/unauthorized-domain') {
         setError('Este dominio (nohasagredo.github.io) no está autorizado en la consola de Firebase Authentication.');
       } else {
         setError('Error al iniciar sesión con Google. Inténtalo de nuevo.');
       }
-      localStorage.removeItem('google_auth_in_progress');
       setLoading(false);
     }
   };
