@@ -116,12 +116,14 @@ h1, h2, h3, h4, h5, h6 {
   transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Escalamiento adaptativo para dispositivos móviles */
 @media (max-width: 480px) {
   html {
-    font-size: 21px; /* Aumenta el tamaño base de rem de 18px a 21px para un escalado mayor en teléfonos */
+    font-size: 19px;
+  }
+  body {
+    zoom: 1.18; /* Zoom global uniforme del 18% en navegadores móviles (Safari, Chrome, etc.) */
   }
   .responsive-container {
-    padding: 0 12px; /* Relleno lateral menor para maximizar el espacio en pantalla */
+    padding: 0 10px; /* Relleno lateral menor para maximizar el espacio útil */
   }
 }
