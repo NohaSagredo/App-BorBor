@@ -666,7 +666,7 @@ export default function MujerHome() {
          const newLogs = {
              ...myLogs,
              [dateStr]: { 
-                 ...myLogs[dateStr], 
+                 ...(myLogs[dateStr] || {}), 
                  ...(answers.emotions !== undefined && { emotions: answers.emotions }),
                  ...(answers.bleeding !== undefined && { bleeding: answers.bleeding }),
                  ...(answers.flowColor !== undefined && { flowColor: answers.flowColor }),
@@ -677,12 +677,13 @@ export default function MujerHome() {
          const stats = getCycleStats(newLogs);
          if (stats.currentStart) {
             setLastPeriodStart(stats.currentStart);
-            calculatePhase(stats.currentStart, stats.cycleLength);
+            calculatePhase(stats.currentStart, stats.cycleLength, newLogs);
          }
          
          setShowDailyCheckin(false);
       } catch (err) {
          console.error("Error al guardar el checkin diario progresivo:", err);
+         alert("Error al guardar registro: " + err.message);
       }
   };
 
