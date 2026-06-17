@@ -473,7 +473,8 @@ export default function MujerHome() {
           <circle cx={cx} cy={cy} r={r} fill="none" stroke="#38bdf8" strokeWidth="22"
             strokeDasharray={`${(fertileDays / cLength) * c} ${c}`}
             strokeLinecap="round"
-            style={{ transform: `rotate(${(fertileStart - 1) * anglePerDay}deg)`, transformOrigin: `${cx}px ${cy}px`, transition: 'all 1s ease' }}
+            transform={`rotate(${(fertileStart - 1) * anglePerDay}, ${cx}, ${cy})`}
+            style={{ transition: 'transform 1s ease' }}
           />
   
           {/* Today Dot Indicator */}
