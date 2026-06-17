@@ -38,7 +38,7 @@ export default function BottomNavBar({ homeRoute = '/mujer' }) {
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        height: '64px',
+        height: '4.25rem',
         maxWidth: '500px',
         margin: '0 auto',
       }}>
@@ -55,8 +55,8 @@ export default function BottomNavBar({ homeRoute = '/mujer' }) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '3px',
-                padding: '8px 4px',
+                gap: '0.2rem',
+                padding: '0.5rem 0.25rem',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
@@ -70,8 +70,8 @@ export default function BottomNavBar({ homeRoute = '/mujer' }) {
                   layoutId="nav-pill"
                   style={{
                     position: 'absolute',
-                    inset: '4px 2px',
-                    borderRadius: '14px',
+                    inset: '0.25rem 0.125rem',
+                    borderRadius: '0.875rem',
                     background: 'var(--color-primary, #f43f5e)',
                     opacity: 0.12,
                   }}
@@ -82,6 +82,8 @@ export default function BottomNavBar({ homeRoute = '/mujer' }) {
                 size={22}
                 strokeWidth={isActive ? 2.5 : 1.8}
                 style={{
+                  width: '1.45rem',
+                  height: '1.45rem',
                   color: isActive
                     ? 'var(--color-primary, #f43f5e)'
                     : 'rgba(148, 163, 184, 0.65)',
@@ -93,7 +95,7 @@ export default function BottomNavBar({ homeRoute = '/mujer' }) {
               />
               <span style={{
                 fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                fontSize: '9px',
+                fontSize: '0.7rem',
                 fontWeight: 700,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',

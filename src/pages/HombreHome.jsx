@@ -632,24 +632,24 @@ export default function HombreHome() {
                 setTheme(themeIds[nextIndex]);
               }}
               style={{
-                width: 40, height: 40, borderRadius: '50%',
+                width: '2.4rem', height: '2.4rem', borderRadius: '50%',
                 background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                fontSize: '1.1rem', cursor: 'pointer', transition: 'all 0.2s ease'
               }}
               aria-label="Cambiar Tema"
             >
               🎨
             </button>
             <button
-              onClick={() => window.location.href='/App-BorBor/perfil'}
+              onClick={() => navigate('/perfil')}
               style={{
-                width: 40, height: 40, borderRadius: '50%',
+                width: '2.4rem', height: '2.4rem', borderRadius: '50%',
                 background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1rem', cursor: 'pointer', overflow: 'hidden'
+                fontSize: '1.1rem', cursor: 'pointer', overflow: 'hidden'
               }}
               aria-label="Perfil"
             >

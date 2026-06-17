@@ -35,8 +35,8 @@ export default function KegelConsistencyWidget({ logs = [], themeColor = 'var(--
                          {ds.dayName}
                       </span>
                       <div style={{
-                         width: '32px', 
-                         height: '32px', 
+                         width: '2rem', 
+                         height: '2rem', 
                          borderRadius: '50%', 
                          display: 'flex', 
                          alignItems: 'center', 

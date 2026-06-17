@@ -93,7 +93,7 @@ export default function ChallengeView({ onStartWorkout }) {
           Construye la disciplina que cambiará tu cuerpo. El reto consiste en completar al menos 1 sesión de entrenamiento al día durante 30 días consecutivos.
         </p>
         
-        <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2.5rem', textAlign: 'left', borderRadius: '20px', width: '100%', maxWidth: '350px' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', marginBottom: '2.5rem', textAlign: 'left', borderRadius: '20px', width: '100%', maxWidth: '22rem' }}>
           <h3 style={{ margin: '0 0 1rem 0', color: 'var(--color-text-main)', fontSize: '1.1rem' }}>Recompensas al finalizar:</h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
              <li style={{ display: 'flex', gap: '10px', alignItems: 'center', color: 'var(--color-text-muted)' }}><Flame color="#ef4444" size={20} /> Racha irrompible</li>
@@ -105,7 +105,7 @@ export default function ChallengeView({ onStartWorkout }) {
         <button 
           onClick={startChallenge}
           className="btn-primary"
-          style={{ width: '100%', maxWidth: '350px', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px', border: 'none', background: 'var(--btn-primary-gradient)', color: 'var(--btn-text-color)', fontWeight: 'bold', boxShadow: '0 8px 25px rgba(244, 63, 94, 0.4)', cursor: 'pointer' }}
+          style={{ width: '100%', maxWidth: '22rem', padding: '1.2rem', fontSize: '1.2rem', borderRadius: '16px', border: 'none', background: 'var(--btn-primary-gradient)', color: 'var(--btn-text-color)', fontWeight: 'bold', boxShadow: '0 8px 25px rgba(244, 63, 94, 0.4)', cursor: 'pointer' }}
         >
           Aceptar el Reto Hoy
         </button>
@@ -141,8 +141,8 @@ export default function ChallengeView({ onStartWorkout }) {
             )}
          </div>
 
-         <div style={{ width: '100%', height: '10px', background: 'rgba(0,0,0,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
-            <div style={{ width: `${progressRatio}%`, height: '100%', background: 'linear-gradient(90deg, #f59e0b, #ef4444)', borderRadius: '10px', transition: 'width 1s ease-out' }}></div>
+         <div style={{ width: '100%', height: '0.625rem', background: 'rgba(0,0,0,0.05)', borderRadius: '0.625rem', overflow: 'hidden' }}>
+            <div style={{ width: `${progressRatio}%`, height: '100%', background: 'linear-gradient(90deg, #f59e0b, #ef4444)', borderRadius: '0.625rem', transition: 'width 1s ease-out' }}></div>
          </div>
       </div>
 
@@ -191,9 +191,9 @@ export default function ChallengeView({ onStartWorkout }) {
               key={day}
               className={`hover-scale ${status === 'TODAY' ? 'jump-anim' : ''}`}
               style={{
-                width: '50px',
-                height: '50px',
-                borderRadius: '16px',
+                width: '3.125rem',
+                height: '3.125rem',
+                borderRadius: '1rem',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',

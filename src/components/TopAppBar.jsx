@@ -25,11 +25,11 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
         left: 0,
         right: 0,
         zIndex: 9999,
-        height: '64px',
+        height: '4.25rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 20px',
+        padding: '0 1.25rem',
         background: 'rgba(8, 6, 14, 0.80)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -38,17 +38,17 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
       }}
     >
       {/* Avatar propio + (opcional) Avatar pareja */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
         {/* Grupo de avatares — propio + pareja */}
         <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
           {/* Avatar propio */}
           <button
             onClick={() => navigate('/perfil')}
             style={{
-              width: '36px',
-              height: '36px',
+              width: '2.4rem',
+              height: '2.4rem',
               borderRadius: '50%',
-              padding: '2px',
+              padding: '0.125rem',
               background: 'linear-gradient(135deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
               flexShrink: 0,
               overflow: 'hidden',
@@ -83,11 +83,11 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
 
           {/* Avatar pareja (solo si está vinculado) */}
           {isLinked && (
-            <div style={{ position: 'relative', marginLeft: '-10px', zIndex: 1 }}>
+            <div style={{ position: 'relative', marginLeft: '-0.65rem', zIndex: 1 }}>
               {/* Anillo de vinculación */}
               <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                padding: '2px',
+                width: '2.1rem', height: '2.1rem', borderRadius: '50%',
+                padding: '0.125rem',
                 background: 'linear-gradient(135deg, #38bdf8, #818cf8)',
                 flexShrink: 0, overflow: 'hidden',
                 boxShadow: '0 0 8px rgba(56,189,248,0.4)',
@@ -108,9 +108,9 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
               <span style={{
                 position: 'absolute', bottom: -3, right: -3,
                 background: 'linear-gradient(135deg, #f43f5e, #c084fc)',
-                borderRadius: '50%', width: 14, height: 14,
+                borderRadius: '50%', width: '0.9rem', height: '0.9rem',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.5rem', border: '1.5px solid rgba(8,6,14,0.9)',
+                fontSize: '0.45rem', border: '0.1rem solid rgba(8,6,14,0.9)',
                 zIndex: 3,
               }}>💞</span>
             </div>
@@ -118,12 +118,12 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
         </div>
 
         <span style={{
-          fontSize: '11px',
+          fontSize: '0.75rem',
           fontWeight: 700,
           color: 'var(--color-primary, #f43f5e)',
           background: 'rgba(255,255,255,0.06)',
-          padding: '2px 8px',
-          borderRadius: '20px',
+          padding: '0.15rem 0.5rem',
+          borderRadius: '1.25rem',
           border: '1px solid rgba(255,255,255,0.1)',
           letterSpacing: '0.04em',
           textTransform: 'uppercase',
@@ -140,7 +140,7 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
           left: '50%',
           transform: 'translateX(-50%)',
           fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-          fontSize: '1.3rem',
+          fontSize: '1.45rem',
           fontWeight: 800,
           letterSpacing: '-0.03em',
           background: 'linear-gradient(90deg, var(--color-primary, #f43f5e), var(--color-secondary, #c084fc))',
@@ -161,13 +161,13 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
       </button>
 
       {/* Theme Toggle + Coins */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         {/* Theme Cycle Button */}
         <button
           onClick={cycleTheme}
           style={{
-            width: '32px',
-            height: '32px',
+            width: '2.1rem',
+            height: '2.1rem',
             borderRadius: '50%',
             background: 'rgba(255,255,255,0.07)',
             border: '1px solid rgba(255,255,255,0.10)',
@@ -187,23 +187,23 @@ export default function TopAppBar({ avatarUrl, partnerAvatarUrl, isLinked, level
           }}
           aria-label="Cambiar Tema"
         >
-          <Palette size={14} style={{ color: 'var(--color-accent, #c084fc)' }} strokeWidth={2.2} />
+          <Palette style={{ width: '1.1rem', height: '1.1rem', color: 'var(--color-accent, #c084fc)' }} strokeWidth={2.2} />
         </button>
 
         {/* Coins */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '5px',
+          gap: '0.3rem',
           background: 'rgba(255,255,255,0.07)',
-          padding: '5px 12px',
-          borderRadius: '20px',
+          padding: '0.3rem 0.75rem',
+          borderRadius: '1.25rem',
           border: '1px solid rgba(255,255,255,0.10)',
         }}>
-          <Coins size={14} style={{ color: '#fbbf24' }} strokeWidth={2.5} />
+          <Coins style={{ width: '1.1rem', height: '1.1rem', color: '#fbbf24' }} strokeWidth={2.5} />
           <span style={{
             fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-            fontSize: '13px',
+            fontSize: '0.8rem',
             fontWeight: 700,
             color: '#f1f5f9',
           }}>

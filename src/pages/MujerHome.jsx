@@ -722,20 +722,20 @@ export default function MujerHome() {
             <button
               onClick={() => setShowNotifications(true)}
               style={{
-                position: 'relative', width: 38, height: 38, borderRadius: '50%',
+                position: 'relative', width: '2.4rem', height: '2.4rem', borderRadius: '50%',
                 background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(6px)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1rem', cursor: 'pointer'
+                fontSize: '1.1rem', cursor: 'pointer'
               }}
               aria-label="Notificaciones"
             >
               🔔
               {notifications.filter(n => !n.read).length > 0 && (
                 <span style={{
-                  position: 'absolute', top: -3, right: -3, background: '#ef4444',
+                  position: 'absolute', top: '-0.2rem', right: '-0.2rem', background: '#ef4444',
                   color: '#fff', fontSize: '0.65rem', fontWeight: 'bold',
-                  width: 16, height: 16, borderRadius: '50%',
+                  width: '1rem', height: '1rem', borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   {notifications.filter(n => !n.read).length}
@@ -745,11 +745,11 @@ export default function MujerHome() {
             <button
               onClick={() => navigate('/perfil')}
               style={{
-                width: 38, height: 38, borderRadius: '50%',
+                width: '2.4rem', height: '2.4rem', borderRadius: '50%',
                 background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)',
                 border: '1px solid rgba(255,255,255,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1rem', cursor: 'pointer', overflow: 'hidden'
+                fontSize: '1.1rem', cursor: 'pointer', overflow: 'hidden'
               }}
               aria-label="Perfil"
             >

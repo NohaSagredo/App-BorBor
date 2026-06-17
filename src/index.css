@@ -118,10 +118,7 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (max-width: 480px) {
   html {
-    font-size: 19px;
-  }
-  body {
-    zoom: 1.18; /* Zoom global uniforme del 18% en navegadores móviles (Safari, Chrome, etc.) */
+    font-size: 22px;
   }
   .responsive-container {
     padding: 0 10px; /* Relleno lateral menor para maximizar el espacio útil */
