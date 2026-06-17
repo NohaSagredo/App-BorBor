@@ -645,17 +645,33 @@ export default function MujerHome() {
 
       try {
          const logRef = doc(db, 'users', auth.currentUser.uid, 'dailyLogs', dateStr);
-         await setDoc(logRef, {
+         
+         const dataToSave = {
              date: dateStr,
-             emotions: answers.emotions,
-             pain: answers.pain,
-             bleeding: answers.bleeding,
              timestamp: new Date().toISOString()
-         }, { merge: true });
+         };
+         
+         if (answers.emotions !== undefined && answers.emotions !== null) {
+             dataToSave.emotions = answers.emotions;
+         }
+         if (answers.bleeding !== undefined && answers.bleeding !== null) {
+             dataToSave.bleeding = answers.bleeding;
+         }
+         if (answers.flowColor !== undefined && answers.flowColor !== null) {
+             dataToSave.flowColor = answers.flowColor;
+         }
+         
+         await setDoc(logRef, dataToSave, { merge: true });
          
          const newLogs = {
              ...myLogs,
-             [dateStr]: { ...myLogs[dateStr], emotions: answers.emotions, pain: answers.pain, bleeding: answers.bleeding, date: dateStr }
+             [dateStr]: { 
+                 ...myLogs[dateStr], 
+                 ...(answers.emotions !== undefined && { emotions: answers.emotions }),
+                 ...(answers.bleeding !== undefined && { bleeding: answers.bleeding }),
+                 ...(answers.flowColor !== undefined && { flowColor: answers.flowColor }),
+                 date: dateStr 
+             }
          };
          setMyLogs(newLogs);
          const stats = getCycleStats(newLogs);
@@ -666,7 +682,7 @@ export default function MujerHome() {
          
          setShowDailyCheckin(false);
       } catch (err) {
-         console.error(err);
+         console.error("Error al guardar el checkin diario progresivo:", err);
       }
   };
 

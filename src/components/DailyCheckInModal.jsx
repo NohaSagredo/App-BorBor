@@ -160,7 +160,18 @@ export default function DailyCheckInModal({ onComplete, onClose }) {
         {/* Manual back step */}
         {currentStep > 0 && (
            <button 
-             onClick={() => setCurrentStep(c => c - 1)}
+             onClick={() => {
+               let prevStep = currentStep - 1;
+               while (prevStep > 0) {
+                 const ps = STEPS[prevStep];
+                 if (ps.skipIfPrev && answers[ps.skipIfPrev.field] === ps.skipIfPrev.value) {
+                   prevStep--;
+                 } else {
+                   break;
+                 }
+               }
+               setCurrentStep(prevStep);
+             }}
              className="mt-6 text-outline font-label-caps tracking-widest uppercase hover:text-white transition-colors"
            >
              ← Volver a la pregunta anterior
